@@ -1,0 +1,6 @@
+.project
+Thumbs.db
+*.php~
+docs/Gemfile.lock
+docs/.sass-cache/
+ressources/pyenv
