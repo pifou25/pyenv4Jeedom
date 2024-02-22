@@ -20,12 +20,12 @@ exclude:
 - vendor
 plugins:
 - jekyll-seo-tag
-title: "Jeedom - Klereo"
-description: "Page de documentation du plugin Jeedom 'Klereo'."
+title: "Jeedom - pyenv4Jeedom"
+description: "Page de documentation du plugin Jeedom 'pyenv4Jeedom'."
 author: "Michel_F"
-image: https://mrwaloo.github.io/jeedom-klereo/jeedom-klereo.png
+image: https://mrwaloo.github.io/pyenv4Jeedom/pyenv4Jeedom.png
 social:
   name: Michel_F
   links:
-    - https://mrwaloo.github.io/jeedom-klereo
+    - https://mrwaloo.github.io/pyenv4Jeedom
 ---

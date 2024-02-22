@@ -5,12 +5,12 @@ var docMenu = [
     fr_FR : "Présentation",
     en_US : "Presentation",
     de_DE : "Präsentation",
-    link : "/jeedom-klereo/#LANG#/#VERSION#/index"
+    link : "/pyenv4Jeedom/#LANG#/#VERSION#/index"
   },{
     fr_FR : "Changelog",
     en_US : "Changelog",
     de_DE : "Changelog",
-    link : "/jeedom-klereo/#LANG#/#VERSION#/changelog"
+    link : "/pyenv4Jeedom/#LANG#/#VERSION#/changelog"
   },{
     divider : true
   }
@@ -47,19 +47,19 @@ if(getCookie('lang') != lang){
 }
 
 $('#meta-lang').attr('content',lang)
-var klereoVersion = 'beta'
+var pyenvVersion = 'beta'
 if(window.location.href.indexOf('beta') != -1){
-  klereoVersion = 'beta'
+  pyenvVersion = 'beta'
 }else if(window.location.href.indexOf('stable') != -1){
-  klereoVersion = 'stable'
-}else if(getCookie('klereoVersion') != ''){
-  klereoVersion = getCookie('klereoVersion');
+  pyenvVersion = 'stable'
+}else if(getCookie('pyenvVersion') != ''){
+  pyenvVersion = getCookie('pyenvVersion');
 }
-if(getCookie('klereoVersion') != klereoVersion){
-  setCookie('klereoVersion',klereoVersion,7)
+if(getCookie('pyenvVersion') != pyenvVersion){
+  setCookie('pyenvVersion',pyenvVersion,7)
 }
-if($('#sel_klereoVersion').val() != klereoVersion){
-  $('#sel_klereoVersion').val(klereoVersion);
+if($('#sel_pyenvVersion').val() != pyenvVersion){
+  $('#sel_pyenvVersion').val(pyenvVersion);
 }
 $('#sel_lang').val(lang);
 for(var i in docMenu){
@@ -76,10 +76,10 @@ for(var i in docMenu){
       if(submenu.link == ''){
         continue;
       }
-      if(submenu.version && submenu.version.indexOf(klereoVersion) == -1){
+      if(submenu.version && submenu.version.indexOf(pyenvVersion) == -1){
         continue;
       }
-      html += '<li><a href="'+submenu.link.replace('#LANG#',lang).replace('#VERSION#',klereoVersion)+'">'+genText(submenu,lang)+'</a></li>';
+      html += '<li><a href="'+submenu.link.replace('#LANG#',lang).replace('#VERSION#',pyenvVersion)+'">'+genText(submenu,lang)+'</a></li>';
     }
     html += '</ul>';
     html += '</div>';
@@ -89,7 +89,7 @@ for(var i in docMenu){
       if(menu.link == ''){
         continue;
       }
-      html += '<li><a href="'+menu.link.replace('#LANG#',lang).replace('#VERSION#',klereoVersion)+'">'+genText(menu,lang)+'</a></li>';
+      html += '<li><a href="'+menu.link.replace('#LANG#',lang).replace('#VERSION#',pyenvVersion)+'">'+genText(menu,lang)+'</a></li>';
     }else{
       html += '<li><strong style="margin-left:5px;" href="#!">'+genText(menu,lang)+'</strong></li>';
     }
@@ -107,7 +107,7 @@ function genText(_menu,_lang){
 }
 
 $(function(){
-  document.title = 'Documentation plugin Klereo'
+  document.title = 'Documentation plugin pyenv4Jeedom'
   $('.sidenav').sidenav();
   setTimeout(function(){
     if ($('#slide-out').length > 0 && window.matchMedia("only screen and (max-width: 760px)").matches) {
@@ -164,11 +164,11 @@ $(function(){
     setTheme();
   })
 
-  $('#sel_klereoVersion').on('change',function(){
-    setCookie('klereoVersion',$(this).val(),7)
+  $('#sel_pyenvVersion').on('change',function(){
+    setCookie('pyenvVersion',$(this).val(),7)
     var url = window.location.href;
-    if(url.indexOf(getCookie('klereoVersion')) == -1){
-      window.location.href = url.replace('beta',getCookie('klereoVersion')).replace('stable',getCookie('klereoVersion'))
+    if(url.indexOf(getCookie('pyenvVersion')) == -1){
+      window.location.href = url.replace('beta',getCookie('pyenvVersion')).replace('stable',getCookie('pyenvVersion'))
       return;
     }
     window.location.reload();
