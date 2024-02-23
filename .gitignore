@@ -4,3 +4,4 @@ Thumbs.db
 docs/Gemfile.lock
 docs/.sass-cache/
 ressources/pyenv
+ressources/shell_init

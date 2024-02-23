@@ -21,11 +21,18 @@ if (!isConnect()) {
   include_file('desktop', '404', 'php');
   die();
 }
+
+$plugin = plugin::byId('pyenv');
+$eqLogics = eqLogic::byType($plugin->getId());
+log::add('pyenv', 'debug', __FILE__ . ' - $eqLogics = *' . var_export($eqLogics, true) . '*');
+echo "PLOP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+
 ?>
+
 <form class="form-horizontal">
   <fieldset>
     <div class="form-group">
-      <label class="col-md-4 control-label">{{Inclure toutes les versions de python et les venv dans le bckup}}
+      <label class="col-md-4 control-label">{{Inclure toutes les versions de python et les venv dans le backup}}
         <sup><i class="fas fa-question-circle tooltips" title="{{À décocher pour réduire la taille du backup et les ressources nécessaires au backup}}"></i></sup>
       </label>
       <div class="col-md-4">

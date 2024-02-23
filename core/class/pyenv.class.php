@@ -95,38 +95,57 @@ class pyenv extends eqLogic {
    }
    */
 
+  /*
+   * Permet d'inclure le répertoire ressources/pyenv au backup
+   */
+  public static function backupExclude() {
+    if (config::byKey('includeInBackup', __CLASS__, '0', true) === '1')
+      return [
+        'resources/pyenv'
+      ];
+    return;
+  }
+
   /*     * *********************Méthodes d'instance************************* */
 
   // Fonction exécutée automatiquement avant la création de l'équipement
   public function preInsert() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
   }
 
   // Fonction exécutée automatiquement après la création de l'équipement
   public function postInsert() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
   }
 
   // Fonction exécutée automatiquement avant la mise à jour de l'équipement
   public function preUpdate() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
   }
 
   // Fonction exécutée automatiquement après la mise à jour de l'équipement
   public function postUpdate() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
   }
 
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
   public function postSave() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
   }
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
   public function preRemove() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
   }
 
   // Fonction exécutée automatiquement après la suppression de l'équipement
   public function postRemove() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
   }
 
   /*
