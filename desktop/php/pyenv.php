@@ -4,8 +4,20 @@ if (!isConnect('admin')) {
 }
 // Déclaration des variables obligatoires
 $plugin = plugin::byId('pyenv');
-sendVarToJS('eqType', $plugin->getId());
-$eqLogics = eqLogic::byType($plugin->getId());
+
+if (!$plugin->isActive()) {
+?>
+	<div class="alert alert-danger div_alert">
+		<span id="span_errorMessage">{{Gestion du plugin impossible tant qu'il est désactivé}}</span>
+	</div>
+<?php
+
+} else {
+
+	sendVarToJS('eqType', $plugin->getId());
+	$eqLogics = eqLogic::byType($plugin->getId());
+	log::add('pyenv', 'debug', __FILE__ . ' - $eqLogics = *' . var_export($eqLogics, true) . '*');
+
 ?>
 
 <div class="row row-overflow">
@@ -202,6 +214,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
 		</div><!-- /.tab-content -->
 	</div><!-- /.eqLogic -->
 </div><!-- /.row row-overflow -->
+
+<?php
+}
+?>
 
 <!-- Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->
 <?php include_file('desktop', 'pyenv', 'js', 'pyenv'); ?>

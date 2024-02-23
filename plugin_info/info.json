@@ -3,19 +3,19 @@
 	"name": "pyenv4Jeedom",
 	"pluginVersion": "0.1",
 	"description": {
-		"fr_FR": "Template servant de base à la création de plugins pour Jeedom"
+		"fr_FR": "Implémentation de pyenv pour Jeedom"
 	},
 	"licence": "AGPL",
 	"author": "Michel_F",
 	"require": "4.2",
 	"category": "programming",
-	"hasDependency": false,
+	"hasDependency": true,
 	"hasOwnDeamon": false,
 	"maxDependancyInstallTime": 0,
-	"changelog_beta": "https:\/\/doc.jeedom.com\/#language#\/plugins\/programming\/template\/beta\/changelog",
-	"changelog": "https:\/\/doc.jeedom.com\/#language#\/plugins\/programming\/template\/changelog",
-	"documentation_beta": "https:\/\/doc.jeedom.com\/#language#\/plugins\/programming\/template\/beta",
-	"documentation": "https:\/\/doc.jeedom.com\/#language#\/plugins\/programming\/template",
+	"changelog_beta": "https:\/\/mrwaloo.github.io\/pyenv4Jeedom\/#language#\/beta\/changelog",
+	"changelog": "https:\/\/mrwaloo.github.io\/pyenv4Jeedom\/#language#\/stable\/changelog",
+	"documentation_beta": "https:\/\/mrwaloo.github.io\/pyenv4Jeedom\/#language#\/beta\/index",
+	"documentation": "https:\/\/mrwaloo.github.io\/pyenv4Jeedom\/#language#\/stable\/index",
 	"language": [
 		"fr_FR",
 		"en_US",
