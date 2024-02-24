@@ -33,6 +33,9 @@ class pyenv extends eqLogic {
   public static $_encryptConfigKey = array('param1', 'param2');
   */
 
+  public static $_SHELL_INIT = 'shell_init';
+  public static $_SCRIPT_TMP = 'script.tmp';
+
   /*     * ***********************Methode static*************************** */
 
   /*
@@ -94,6 +97,56 @@ class pyenv extends eqLogic {
       return "les infos essentiel de mon plugin";
    }
    */
+
+  /*
+   * Initialise le plugin en créant un équipement fictif
+   * TODO: Voir si cet équipement est utile
+   */
+  public static function init() {
+    $eqLogics = self::byType(__CLASS__);
+    if (count($eqLogics) === 0) {
+      log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' : ' . __("Création de l'équipement pyenv", __FILE__));
+      $eqLogic = new pyenv();
+      $eqLogic->setName(__CLASS__);
+      $eqLogic->setLogicalId(__CLASS__);
+      $eqLogic->setEqType_name(__CLASS__);
+      $eqLogic->setIsEnable(1);
+      $eqLogic->setIsVisible(0);
+      $eqLogic->save();
+    }
+  }
+
+  /*
+   * Permet d'exécuter une commande pyenv
+   */
+  public static function runPyenv($_command) {
+    if (strpos($_command, 'pyenv') === false)
+      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . __("La commande à exécuter n'est pas une commande pyenv.", __FILE__));
+    
+    $script_content = file_get_contents(__DIR__ . '/../../ressources/' . self::$_SHELL_INIT) . "\n";
+    $script_content .= $_command;
+    $script_file = realpath(__DIR__ . '/../../ressources') . '/' . self::$_SCRIPT_TMP;
+    if (!file_put_contents($script_file, $script_content))
+      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . __("Impossible de créer le script pour la commande pyenv.", __FILE__));
+    chmod($script_file, 0755);
+    $ret = shell_exec($script_file);
+    unlink($script_file);
+    return $ret;
+  }
+
+  /*
+   * Permet de mettre à jour pyenv
+   */
+  public static function updatePyenv() {
+
+  }
+
+  /*
+   * Permet de créer un virtualenv
+   */
+  public static function createVirtualenv($_pluginId, $_pythonVersion, $_requirements) {
+
+  }
 
   /*
    * Permet d'inclure le répertoire ressources/pyenv au backup
@@ -192,3 +245,5 @@ class pyenvCmd extends cmd {
 
   /*     * **********************Getteur Setteur*************************** */
 }
+
+?>

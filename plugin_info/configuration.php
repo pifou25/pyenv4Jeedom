@@ -21,12 +21,6 @@ if (!isConnect()) {
   include_file('desktop', '404', 'php');
   die();
 }
-
-$plugin = plugin::byId('pyenv');
-$eqLogics = eqLogic::byType($plugin->getId());
-log::add('pyenv', 'debug', __FILE__ . ' - $eqLogics = *' . var_export($eqLogics, true) . '*');
-echo "PLOP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-
 ?>
 
 <form class="form-horizontal">
