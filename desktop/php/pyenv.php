@@ -27,8 +27,15 @@ if (!$plugin->isActive()) {
 	// TODO: ajouter ici la gstion des pyenv-virtualenv
 	
 
-	$ret = pyenv::runPyenv('pyenv install -l');
+	//$ret = pyenv::runPyenv('pyenv install -l');
+	//$ret = pyenv::runPyenv('pyenv virtualenvs --skip-aliases --bare | grep mymodbus | grep -v mymodbus_2');
+	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '_1');
+	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '_2');
+	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '_3');
+	$ret = pyenv::deleteVirtualenv('mymodbus_2');
 	log::add($pluginId, 'debug', __FILE__ . ' : $ret = ' . var_export($ret, true));
+	log::add($pluginId, 'debug', __FILE__ . ' : count($ret) = ' . var_export(count($ret), true));
+	echo $ret;
 
 }
 
