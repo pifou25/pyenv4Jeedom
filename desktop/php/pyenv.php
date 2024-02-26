@@ -16,23 +16,19 @@ if (!$plugin->isActive()) {
 } else {
 
 	sendVarToJS('eqType', $plugin->getId());
-	$eqLogics = eqLogic::byType($plugin->getId());
-	//log::add($pluginId, 'debug', __FILE__ . ' - $eqLogics = *' . var_export($eqLogics, true) . '*');
-
-	pyenv::init();
 
 	echo sprintf(__('<legend><i class="fas fa-cog"></i> {{Gestion de %s}}</legend>', __FILE__), $plugin->getName());
 	$eqLogic = pyenv::byLogicalId($plugin->getId(), $plugin->getId());
 
-	// TODO: ajouter ici la gstion des pyenv-virtualenv
+	// TODO: ajouter ici la gestion des pyenv-virtualenv
 	
 
 	//$ret = pyenv::runPyenv('pyenv install -l');
-	//$ret = pyenv::runPyenv('pyenv virtualenvs --skip-aliases --bare | grep mymodbus | grep -v mymodbus_2');
-	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '_1');
-	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '_2');
-	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '_3');
-	$ret = pyenv::deleteVirtualenv('mymodbus_2');
+	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '1');
+	//$ret = pyenv::createVirtualenv('mymodbus', '3.7.2', 'pymodbus', '2');
+	$ret = pyenv::createVirtualenv('mymodbus', '3.11.4', 'pymodbus');
+	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '3');
+	//$ret = pyenv::deleteVirtualenv('mymodbus', '2');
 	log::add($pluginId, 'debug', __FILE__ . ' : $ret = ' . var_export($ret, true));
 	log::add($pluginId, 'debug', __FILE__ . ' : count($ret) = ' . var_export(count($ret), true));
 	echo $ret;
