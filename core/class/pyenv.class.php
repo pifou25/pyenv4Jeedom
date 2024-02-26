@@ -122,7 +122,7 @@ class pyenv extends eqLogic {
   /*
    * Met pyenv à jour
    */
-  public static function updatePyenv() {
+  static function updatePyenv() {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
     return self::runPyenv('pyenv update');
   }
@@ -160,7 +160,7 @@ class pyenv extends eqLogic {
   public static function createVirtualenv($_pluginId, $_pythonVersion, $_requirements, $_suffix='none') {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * pluginId = '%s', pythonVersion = '%s', requirements = '%s', suffix = '%s'", $_pluginId, $_pythonVersion, $_requirements, $_suffix));
     if (self::virtualenvIsInstalled($_pluginId . '++' . $_suffix))
-      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' existe déjà", __FILE__), $_pluginId));
+      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' existe déjà", __FILE__), $_pluginId . '++' . $_suffix));
     $list_plugins = plugin::listPlugin(false, false, false, true); // Liste des id des plugins installés
     if (!in_array($_pluginId, $list_plugins))
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le plugin '%s' n'existe pas", __FILE__), $_pluginId));

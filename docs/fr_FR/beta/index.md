@@ -8,6 +8,11 @@ Le plugin pyenv4Jeedom (pyenv) permet d'externaliser les fonctions de pyenv. Ce 
 plugin que vous avez installé. Si ne développez pas un plugin nécessitant pyenv, cette documentation ne vous sera
 d'aucune utilité.
 
+# Configuration
+
+Il est seulement possible de configurer pyenv4Jeedom pour inclure pyenv au backup ou pas. La configuration par défaut
+est sans inclusion afin de limiter la taille du backup et les ressources nécessaires pour créer le backup.
+
 ***
 
 # Le principe

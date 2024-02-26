@@ -26,7 +26,7 @@ if (!$plugin->isActive()) {
 	//$ret = pyenv::runPyenv('pyenv install -l');
 	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '1');
 	//$ret = pyenv::createVirtualenv('mymodbus', '3.7.2', 'pymodbus', '2');
-	$ret = pyenv::createVirtualenv('mymodbus', '3.11.4', 'pymodbus');
+	$ret = pyenv::createVirtualenv('mymodbus', '3.9.18', 'pymodbus', 'toto');
 	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '3');
 	//$ret = pyenv::deleteVirtualenv('mymodbus', '2');
 	log::add($pluginId, 'debug', __FILE__ . ' : $ret = ' . var_export($ret, true));
