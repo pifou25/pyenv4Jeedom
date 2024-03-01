@@ -18,8 +18,11 @@ est sans inclusion afin de limiter la taille du backup et les ressources nécess
 # Le principe
 
 pyenv est un outil permettant d'utiliser la version de python que vous souhaitez et pyenv4Jeedom vous permet d'isoler
-l'exécution de votre script python dans une virtualenv dédié. Il est possible de créer plusieurs virtualenv avec des
-versions de python différentes.
+l'exécution de votre script python dans un virtualenv dédié. Il est possible de créer plusieurs virtualenv avec des
+versions de python différentes ou avec des versions de modules différentes.
+
+Il est possible d'installer une version plus récente que celle du système mais aussi plus ancienne afin de pouvoir
+faire fonctionner une ancienne version d'un module.
 
 # Installation du plugin
 
@@ -48,29 +51,33 @@ puissiez savoir si tout s'est bien passé.
 ### Description
 
 ```php
-pyenv::createVirtualenv($_pluginId, $_pythonVersion, $_requirements, $_suffix='none')
+pyenv::createVirtualenv($_pluginId, $_pythonVersion, $_requirements, $_suffix='none', $_upgrade=false);
 ```
 
 **pyenv::createVirtualenv()** :
-- installe la version de python $_pythonVersion si elle n'est pas installée,
-- crée un virtualenv du nom du $_pluginId avec un suffix afin de pouvoir créer plusieurs virtualenv pour le même
-plugin, même si les cas d'usage seront très rares.
-- installe les modules nécessaires
+- installe la version de python *$_pythonVersion* si elle n'est pas installée,
+- crée un virtualenv du nom du *$_pluginId* avec un suffixe afin de pouvoir créer plusieurs virtualenv pour le même
+plugin, même si les cas d'usage seront très rares,
+- installe les modules nécessaires,
+- si *$_upgrade* est vrai (true), supprime le virtualenv s'il existe et le réinstalle dans la nouvelle version de
+python.
 
 ### Liste des paramètres
 
-**$pluginId**: l'id du plugin pour lequel le virtualenv est installé. Si le plugin n'est pas installé, une exception
-est levée. Si le nom du virtualenv existe déjà, une exception est levée.
+**$pluginId**: (string) l'id du plugin pour lequel le virtualenv est installé. Si le plugin n'est pas installé, une
+exception est levée. Si le nom du virtualenv existe déjà, une exception est levée.
 
-**$_pythonVersion**: la version de python pour laquelle le virtualenv doit être installé. Si cette version n'est pas
-installée, cette instruction l'installera. La version doit être disponible à l'installation sans quoi une exception est
-levée.
+**$_pythonVersion**: (string) la version de python pour laquelle le virtualenv doit être installé. Si cette version
+n'est pas installée, cette instruction l'installera. La version doit être disponible à l'installation sans quoi une
+exception est levée.
 
-**$_requirements**: si c'est le chemin d'un fichier, ce fichier doit être au format `requirements.txt`. Les modules
-décrits seront installés. $_requirements peut également être le contenu d'un fichier `requirements.txt`.
+**$_requirements**: (string) si c'est le chemin d'un fichier, ce fichier doit être au format `requirements.txt`. Les
+modules décrits seront installés. *$_requirements* peut également être le contenu d'un fichier `requirements.txt`.
 
-**$_suffix**: afin de différencier les virtualenv installés pour un même plugin, ceux-ci doivent avoir un suffix
-différent. Le nom réel pour le virtualenv est `$pluginId . '++' . $_suffix`.
+**$_suffix**: (string) afin de différencier les virtualenv installés pour un même plugin, ceux-ci doivent avoir un
+suffixe différent. Le nom réel pour le virtualenv est `$_pluginId . '++' . $_suffix`.
+
+**$_upgrade**: (boolean) à mettre à true pour mettre la version de python d'un virtualenv existant à niveau.
 
 ### Valeur de retour
 
@@ -80,7 +87,167 @@ Pas de valeur de retour. En cas d'erreur, une exception est levée.
 
 ```php
 try {
-  pyenv::createVirtualenv('mymodbus', '3.12.2', 'pymodbus==3.2.2');
+  pyenv::createVirtualenv('mymodbus', '3.11.4', 'pymodbus==3.2.2', 'pymodbus3.2.2');
+} catch (Exception $e) {
+  
+}
+```
+
+## pyenv::deleteVirtualenv
+
+### Description
+
+```php
+pyenv::deleteVirtualenv($_pluginId, $_suffix='none');
+```
+
+**pyenv::deleteVirtualenv** :
+- supprime le virtualenv pour le plugin *$_pluginId* avec le suffixe *$_suffix*,
+- supprime la version de python dans laquelle ce virtualenv a été installé si aucun autre virtualenv n'est installé
+dans cette version.
+
+### Liste des paramètres
+
+**$_pluginId**: (string) l'id du plugin pour lequel le virtualenv doit être supprimé. Si le plugin n'est pas installé,
+une exception est levée.
+
+**$_suffix**: (string) le suffixe du virtualenv à supprimer. Si aucun virtualenv ne correspond, rien n'est fait et
+aucune exception n'est levée.
+
+### Valeur de retour
+
+Pas de valeur de retour. En cas d'erreur, une exception est levée.
+
+### Exemple
+
+```php
+try {
+  pyenv::deleteVirtualenv('mymodbus');
+} catch (Exception $e) {
+  
+}
+```
+
+## pyenv::getVirtualenvNames
+
+### Description
+
+```php
+pyenv::getVirtualenvNames($_pluginId='', $_pythonVersion='', $_suffix='');
+```
+
+**pyenv::getVirtualenvNames** recherche les virtualenv selon des critères de recherche.  
+Recommandé pour récupérer le nom du virtualenv à utiliser pour les commandes **pyenv::runPyenv** ou
+**pyenv::sourceScript**.
+
+### Liste des paramètres
+
+**$_pluginId**: l'id du plugin pour lequel le virtualenv doit être recherché. Si le plugin n'est pas installé, une
+exception est levée. Si ce paramètre n'est pas précisé, les virtualenv de tous les plugins seront listés.
+
+**$_pythonVersion**: (string) la version de python pour laquelle le virtualenv doit être recherché. Si ce paramètre
+n'est pas précisé, les virtualenv de toutes les versions de python seront listées.
+
+**$_suffix**: (string) le suffixe du virtualenv à rechercher. Si ce paramètre n'est pas précisé, tous les virtualenv de
+seront listées.
+
+### Valeur de retour
+
+Retourne une liste (array) avec le nom du virtualenv et la version python des virtualenv correspondants aux critères de
+recherche.
+
+### Exemple
+
+```php
+try {
+  pyenv::getVirtualenvNames('mymodbus', '3.11.4');
+} catch (Exception $e) {
+  
+}
+```
+Retourne :
+```php
+array (
+  0 =>    array (
+    'name' => 'mymodbus++pymodbus3.2.2',
+    'python' => '3.11.4'
+  ),
+  1 =>    array (
+    'name' => 'mymodbus++pymodbus3.5.2',
+    'python' => '3.11.4'
+  ),
+  2 =>    array (
+    'name' => 'mymodbus++pymodbus3.6.4',
+    'python' => '3.11.4'
+    )
+  )
+```
+
+## pyenv::runPyenv
+
+### Description
+
+```php
+pyenv::runPyenv($_command, $_args='', $_virtualenv=null, $_daemon=false);
+```
+
+**pyenv::runPyenv** lance une commande dans l'environnement pyenv.
+
+### Liste des paramètres
+
+**$_command**: (string) commande à exécuter. S'il s'agit d'un fichier, une commande `cd` sera exécutée vers le
+répertoire du fichier avant d'exécuter la commande.
+
+**$_args**: (string) les arguments de la commande. A préciser surtout si la commande est un fichier script.
+
+**$_virtualenv**: (string) le nom du virtualenv dans lequel exécuter la commande. Si non précisé, le résultat est
+l'équivalent de `exec($_commande . ' ' . $_args)`.
+
+**$_daemon**: (boolean) mode démon. Avec un virtualenv, la sortie du script est redirigée vers le log du plugin.
+
+### Valeur de retour
+
+Retourne le résultat de la commande dans un array, à raison d'un élément par ligne de retour.  
+Ne retourne rien en mode démon.
+
+### Exemple
+
+```php
+$args = '-a -b "valeur"';
+$virtualenvs = pyenv::getVirtualenvNames('mymodbus', '3.11.4', 'pymodbus3.2.2');
+try {
+  pyenv::runPyenv(realpath(__DIR__ . '/../../ressources/super_script.py'), $args, $virtualenvs[0]['name']);
+} catch (Exception $e) {
+  
+}
+```
+
+## pyenv::sourceScript
+
+### Description
+
+```php
+pyenv::sourceScript($_command, $_args='', $_virtualenv=null, $_daemon=false);
+```
+
+**pyenv::sourceScript** génère le contenu d'un script shell pour exécuter la commande dans l'environnement pyenv.
+
+### Liste des paramètres
+
+Identique à **pyenv::runPyenv**.
+
+### Valeur de retour
+
+Retourne contenu d'un script shell (sans la ligne shebang) pour exécuter la commande sous forme de string.
+
+### Exemple
+
+
+```php
+$args = '-a -b "valeur"';
+$virtualenvs = pyenv::getVirtualenvNames('mymodbus', '3.11.4', 'pymodbus3.2.2');
+try {
+  $script = pyenv::sourceScript(realpath(__DIR__ . '/../../ressources/super_script.py'), $args, $virtualenvs[0]['name']);
 } catch (Exception $e) {
   
 }

@@ -39,6 +39,8 @@ class pyenv extends eqLogic {
   public static $_PYTHON_BUILD = '/pyenv/plugins/python-build/bin/python-build';
   public static $_REQUIREMENTS = '/requirements.txt';
 
+  public static $_SEPARATOR = '++';
+
   /*     * ***********************Methode static*************************** */
 
   /*
@@ -130,7 +132,7 @@ class pyenv extends eqLogic {
   /*
    * Installe une version de python
    */
-  public static function installPython($_version) {
+  static function installPython($_version) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
     if (self::pythonIsInstalled($_version))
       return;
@@ -147,7 +149,7 @@ class pyenv extends eqLogic {
   /*
    * Désinstalle une version de python
    */
-  public static function uninstallPython($_version) {
+  static function uninstallPython($_version) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
     $command = sprintf('pyenv uninstall -f %s', $_version);
     if (self::pythonIsInstalled($_version))
@@ -155,16 +157,30 @@ class pyenv extends eqLogic {
   }
 
   /*
+   * Vérifie si un plugin exste
+   */
+  static function pluginExists($_pluginId) {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * pluginId = ' . $_pluginId);
+    $list_plugins = plugin::listPlugin(false, false, false, true); // Liste des id des plugins installés
+    return in_array($_pluginId, $list_plugins);
+  }
+
+  /*
    * Crée un virtualenv pour un plugin et installe les modules
    */
-  public static function createVirtualenv($_pluginId, $_pythonVersion, $_requirements, $_suffix='none') {
+  public static function createVirtualenv($_pluginId, $_pythonVersion, $_requirements, $_suffix='none', $_upgrade=false) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * pluginId = '%s', pythonVersion = '%s', requirements = '%s', suffix = '%s'", $_pluginId, $_pythonVersion, $_requirements, $_suffix));
-    if (self::virtualenvIsInstalled($_pluginId . '++' . $_suffix))
-      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' existe déjà", __FILE__), $_pluginId . '++' . $_suffix));
-    $list_plugins = plugin::listPlugin(false, false, false, true); // Liste des id des plugins installés
-    if (!in_array($_pluginId, $list_plugins))
+    if (self::virtualenvIsInstalled($_pluginId . self::$_SEPARATOR . $_suffix)) {
+      if ($_upgrade)
+        self::deleteVirtualenv($_pluginId, $_suffix);
+      else
+        throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' existe déjà", __FILE__), $_pluginId . self::$_SEPARATOR . $_suffix));
+    }
+    if (!self::pluginExists($_pluginId))
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le plugin '%s' n'existe pas", __FILE__), $_pluginId));
-    
+    if (strpos($_suffix, self::$_SEPARATOR))
+      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le suffixe '%s' n'est pas valide", __FILE__), $_suffix));
+
     self::installPython($_pythonVersion);
     
     $requirements_content = '';
@@ -177,11 +193,11 @@ class pyenv extends eqLogic {
     if (file_put_contents($requirements_txt, $requirements_content) === false)
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Impossible de créer le fichier '%s'", __FILE__), $requirements_txt));
 
-    $command = sprintf('pyenv virtualenv %s %s', $_pythonVersion, $_pluginId . '++' . $_suffix);
+    $command = sprintf('pyenv virtualenv %s %s', $_pythonVersion, $_pluginId . self::$_SEPARATOR . $_suffix);
     self::runPyenv($command);
     
     $command = sprintf('pyenv exec pip install -r "%s"', $requirements_txt);
-    self::runPyenv($command, '', $_pluginId . '++' . $_suffix);
+    self::runPyenv($command, '', $_pluginId . self::$_SEPARATOR . $_suffix);
     unlink($requirements_txt);
   }
 
@@ -190,18 +206,20 @@ class pyenv extends eqLogic {
    */
   public static function deleteVirtualenv($_pluginId, $_suffix='none') {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * pluginId = '%s', suffix = '%s'", $_pluginId, $_suffix));
-    $command = sprintf('pyenv virtualenvs --skip-aliases --bare | grep %s', $_pluginId . '++' . $_suffix);
+    if (!self::pluginExists($_pluginId))
+      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le plugin '%s' n'existe pas", __FILE__), $_pluginId));
+    $command = sprintf('pyenv virtualenvs --skip-aliases --bare | grep %s', $_pluginId . self::$_SEPARATOR . $_suffix);
     $inst_virtualenvs = self::runPyenv($command);
     $pythonVersion = null;
     foreach ($inst_virtualenvs as $row) {
       $list = explode('/', $row);
-      if ($list[2] === $_pluginId . '++' . $_suffix)
+      if ($list[2] === $_pluginId . self::$_SEPARATOR . $_suffix)
         $pythonVersion = $list[0];
     }
     $command = sprintf('pyenv virtualenvs --skip-aliases --bare | grep %1$s | grep -v %1$s++%2$s', $_pluginId, $_suffix);
     $virtualenvs = self::runPyenv($command);
-    $command = sprintf('pyenv virtualenv-delete -f %s', $_pluginId . '++' . $_suffix);
-    if (self::virtualenvIsInstalled($_pluginId . '++' . $_suffix))
+    $command = sprintf('pyenv virtualenv-delete -f %s', $_pluginId . self::$_SEPARATOR . $_suffix);
+    if (self::virtualenvIsInstalled($_pluginId . self::$_SEPARATOR . $_suffix))
       self::runPyenv($command);
     if (count($virtualenvs) === 0 && !is_null($pythonVersion))
       self::uninstallPython($pythonVersion);
@@ -210,11 +228,18 @@ class pyenv extends eqLogic {
   /*
    * Exécute une commande pyenv
    */
-  public static function runPyenv($_command, $_args='', $_virtualenv=null) {
-    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s'", $_command, $_args, $_virtualenv));
-    $script_file = realpath(__DIR__ . '/../../ressources') . self::$_SCRIPT_TMP;
-    if (is_file($script_file))
-      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . __("La commande ne peut être exécutée, une commande pyenv est en cours d'exécution.", __FILE__));
+  public static function runPyenv($_command, $_args='', $_virtualenv=null, $_daemon=false) {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s', daemon = '%s'", $_command, $_args, $_virtualenv, $_daemon));
+    $script_file = '';
+    if (!$_daemon) {
+      $script_file = realpath(__DIR__ . '/../../ressources') . self::$_SCRIPT_TMP;
+      if (is_file($script_file))
+        throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . __("La commande ne peut être exécutée, une commande pyenv est en cours d'exécution.", __FILE__));
+    } else {
+      $script_file = tempnam(realpath(__DIR__ . '/../../ressources'), self::$_SCRIPT_TMP);
+      if (!is_null($_virtualenv) && !self::virtualenvIsInstalled($_virtualenv))
+          throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' n'est pas installé", __FILE__), $_virtualenv));
+    }
     
     $script_content = self::sourceScript($_command, $_args, $_virtualenv);
     
@@ -235,19 +260,25 @@ class pyenv extends eqLogic {
   /*
    * Retourne le contenu du script à exécuter pour être dans un environnement pyenv
    */
-  public static function sourceScript($_command, $_args='', $_virtualenv=null) {
-    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s'", $_command, $_args, $_virtualenv));
+  public static function sourceScript($_command, $_args='', $_virtualenv=null, $_daemon=false) {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s', daemon = '%s'", $_command, $_args, $_virtualenv, $_daemon));
     $ret = file(realpath(__DIR__ . '/../../ressources') . self::$_SHELL_INIT);
     if (is_file($_command)) {
       $dirname = dirname($_command);
       $ret[] = sprintf('cd "%s"', $dirname);
     }
-    if (!is_null($_virtualenv)){
+    if (!is_null($_virtualenv)) {
       if (!self::virtualenvIsInstalled($_virtualenv))
         throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' n'est pas installé", __FILE__), $_virtualenv));
+      if (!$_daemon) {
+        list($pluginId, $suffix) = explode(self::$_SEPARATOR, $_virtualenv);
+        $_args .= ' >> ' . log::getPathToLog($pluginId) . ' 2>&1 &';
+      }
       $ret[] = sprintf('pyenv activate %s', $_virtualenv);
       $ret[] = sprintf('pyenv exec %s %s', $_command, $_args);
     } else {
+      if ($_daemon)
+        $_args .= ' 2>&1 &';
       $ret[] = sprintf('%s %s', $_command, $_args);
     }
     foreach ($ret as &$row)
@@ -258,16 +289,38 @@ class pyenv extends eqLogic {
   /*
    * Vérifie si une version de python (ou un virtualenv) est installé
    */
-  public static function pythonIsInstalled($_version) {
+  static function pythonIsInstalled($_version) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
     $installed_pythons = self::runPyenv('pyenv versions --bare');
     return in_array($_version, $installed_pythons);
   }
 
   /*
+   * Retourne le nom du ou des virtualenv correspondants
+   */
+  public static function getVirtualenvNames($_pluginId='', $_pythonVersion='', $_suffix='') {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * pluginId = '%s', pythonVersion = '%s', suffix = '%s'", $_pluginId, $_pythonVersion, $_suffix));
+    if ($_pluginId && !self::pluginExists($_pluginId))
+      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le plugin '%s' n'existe pas", __FILE__), $_pluginId));
+    $ret = array();
+    $virtualenvs = self::runPyenv('pyenv virtualenvs --skip-aliases --bare');
+    foreach ($virtualenvs as $virtualenv) {
+      list($version, , $virtualenvName) = explode('/', $virtualenv);
+      if ((!$_pluginId || strpos($virtualenvName, $_pluginId . self::$_SEPARATOR) === 0) &&
+          (!$_pythonVersion || $version === $_pythonVersion) &&
+          (!$_suffix || strpos($virtualenvName, self::$_SEPARATOR . $_suffix) > 0))
+        $ret[] = array(
+          'name' => $virtualenvName,
+          'python' => $version
+        );
+    }
+    return $ret;
+  }
+
+  /*
    * Vérifie si un virtualenv est installé
    */
-  public static function virtualenvIsInstalled($_virtualenv) {
+  static function virtualenvIsInstalled($_virtualenv) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * virtualenv = ' . $_virtualenv);
     $installed_virtualenvs = self::runPyenv('pyenv virtualenvs --bare');
     return in_array($_virtualenv, $installed_virtualenvs);
@@ -280,7 +333,7 @@ class pyenv extends eqLogic {
     if (config::byKey('includeInBackup', __CLASS__, '0', true) === '1')
       return;
     return [
-      'resources/pyenv'
+      'ressources/pyenv'
     ];
   }
 

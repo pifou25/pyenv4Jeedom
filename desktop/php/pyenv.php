@@ -18,21 +18,54 @@ if (!$plugin->isActive()) {
 	sendVarToJS('eqType', $plugin->getId());
 
 	echo sprintf(__('<legend><i class="fas fa-cog"></i> {{Gestion de %s}}</legend>', __FILE__), $plugin->getName());
-	$eqLogic = pyenv::byLogicalId($plugin->getId(), $plugin->getId());
-
-	// TODO: ajouter ici la gestion des pyenv-virtualenv
 	
+	$virtualenvNames = pyenv::getVirtualenvNames();
+	//log::add($pluginId, 'debug', __FILE__ . ' : $ret = ' . var_export($ret, true));
+	if (count($virtualenvNames) === 0) {
+		echo '<p>' . __("Aucun virtualenv pyenv à afficher.") . '</p>';
+	} else {
 
-	//$ret = pyenv::runPyenv('pyenv install -l');
-	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '1');
-	//$ret = pyenv::createVirtualenv('mymodbus', '3.7.2', 'pymodbus', '2');
-	$ret = pyenv::createVirtualenv('mymodbus', '3.9.18', 'pymodbus', 'toto');
-	//$ret = pyenv::createVirtualenv('mymodbus', '3.10.8', 'pymodbus', '3');
-	//$ret = pyenv::deleteVirtualenv('mymodbus', '2');
-	log::add($pluginId, 'debug', __FILE__ . ' : $ret = ' . var_export($ret, true));
-	log::add($pluginId, 'debug', __FILE__ . ' : count($ret) = ' . var_export(count($ret), true));
-	echo $ret;
+		log::add($pluginId, 'debug', __FILE__ . ' : $virtualenvNames = ' . var_export($virtualenvNames, true));
+		//echo '<pre>';
+		//var_export($virtualenvNames);
+		//echo '</pre>';
+		
+?>
 
+<table id="table_virtualenv">
+	<thead>
+		<tr>
+			<th style="min-width:200px;width:300px;">{{PluginId}}</th>
+			<th style="min-width:200px;width:300px;">{{Version python}}</th>
+			<th style="min-width:200px;width:300px;">{{Suffixe}}</th>
+		</tr>
+	</thead>
+	<tbody>
+
+<?php
+
+		foreach ($virtualenvNames as $virtualenv) {
+			[$pluginId, $suffix] = explode(pyenv::$_SEPARATOR, $virtualenv['name']);
+			echo '<tr>';
+			echo '  <td>';
+			echo $pluginId;
+			echo '  </td>';
+			echo '  <td>';
+			echo $virtualenv['python'];
+			echo '  </td>';
+			echo '  <td>';
+			echo $suffix;
+			echo '  </td>';
+			echo '</tr>';
+		}
+
+?>
+
+	</tbody>
+</table>
+
+<?php
+	
 }
 
 // Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->
