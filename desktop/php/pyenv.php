@@ -65,7 +65,8 @@ if (!$plugin->isActive()) {
 </table>
 
 <?php
-	
+
+	}	
 }
 
 // Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->

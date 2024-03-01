@@ -271,7 +271,7 @@ class pyenv extends eqLogic {
       if (!self::virtualenvIsInstalled($_virtualenv))
         throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' n'est pas installé", __FILE__), $_virtualenv));
       if (!$_daemon) {
-        list($pluginId, $suffix) = explode(self::$_SEPARATOR, $_virtualenv);
+        [$pluginId, $suffix] = explode(self::$_SEPARATOR, $_virtualenv);
         $_args .= ' >> ' . log::getPathToLog($pluginId) . ' 2>&1 &';
       }
       $ret[] = sprintf('pyenv activate %s', $_virtualenv);
@@ -305,7 +305,7 @@ class pyenv extends eqLogic {
     $ret = array();
     $virtualenvs = self::runPyenv('pyenv virtualenvs --skip-aliases --bare');
     foreach ($virtualenvs as $virtualenv) {
-      list($version, , $virtualenvName) = explode('/', $virtualenv);
+      [$version, , $virtualenvName] = explode('/', $virtualenv);
       if ((!$_pluginId || strpos($virtualenvName, $_pluginId . self::$_SEPARATOR) === 0) &&
           (!$_pythonVersion || $version === $_pythonVersion) &&
           (!$_suffix || strpos($virtualenvName, self::$_SEPARATOR . $_suffix) > 0))
