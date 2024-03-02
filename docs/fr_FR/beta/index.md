@@ -5,13 +5,14 @@
 > au début du changelog et ne sont donc pas évoquées ici.
 
 Le plugin pyenv4Jeedom (pyenv) permet d'externaliser les fonctions de pyenv. Ce plugin est une dépendance pour un autre
-plugin que vous avez installé. Si ne développez pas un plugin nécessitant pyenv, cette documentation ne vous sera
+plugin que vous avez installé. Si vous ne développez pas un plugin nécessitant pyenv, cette documentation ne vous sera
 d'aucune utilité.
 
 # Configuration
 
 Il est seulement possible de configurer pyenv4Jeedom pour inclure pyenv au backup ou pas. La configuration par défaut
-est sans inclusion afin de limiter la taille du backup et les ressources nécessaires pour créer le backup.
+est sans inclusion afin de limiter la taille du backup et les ressources nécessaires pour créer le backup. Le choix
+pour cette option est laissée à l'utilisateur en fonction de la place et des ressources disponibles sur son système.
 
 ***
 
@@ -19,12 +20,17 @@ est sans inclusion afin de limiter la taille du backup et les ressources nécess
 
 pyenv est un outil permettant d'utiliser la version de python que vous souhaitez et pyenv4Jeedom vous permet d'isoler
 l'exécution de votre script python dans un virtualenv dédié. Il est possible de créer plusieurs virtualenv avec des
-versions de python différentes ou avec des versions de modules différentes.
+versions de python différentes ou avec des versions du même module différentes.
 
 Il est possible d'installer une version plus récente que celle du système mais aussi plus ancienne afin de pouvoir
 faire fonctionner une ancienne version d'un module.
 
+Finalement pyenv permet de garantir la compatibilité de votre plugin quelle que soit la version debian sur laquelle est
+installée Jeedom en fixant les versions à utiliser.
+
 # Installation du plugin
+
+## Version stable
 
 Depuis la version 4.2 de Jeedom, il est conseillé d'utiliser la méthode d'installation de votre plugin avec le fichier
 **packages.json**. Dans ce fichier, il faut inclure `pyenv` dans les plugins à installer :
@@ -37,6 +43,41 @@ Depuis la version 4.2 de Jeedom, il est conseillé d'utiliser la méthode d'inst
 
 }
 ```
+
+## Version bêta
+
+Pour installer la version bêta, comme il n'y a pas de moyen via le fichier **packages.json**, il est possible de le
+faire en php dans le fichier **plugin_info/install.php**. Dans ce fichier il est possible de créer une fonction
+**install_pyenv** qui, dans le plugin MyModbus est le suivant :
+```php
+function install_pyenv() {
+  $myModbusId = 'mymodbus';
+  $myModbusUpdate = update::byLogicalId($myModbusId);
+  $myModbusVersion = $myModbusUpdate->getConfiguration('version');
+
+  $pluginId = 'pyenv';
+  $update = update::byLogicalId($pluginId);
+  if (!is_object($update)) {
+    $update = new update();
+    $update->setLogicalId($pluginId);
+  }
+  $update->setSource('market');
+  $update->setConfiguration('version', $myModbusVersion);
+  $update->save();
+  $update->doUpdate();
+  $plugin = plugin::byId($pluginId);
+  if (!is_object($plugin)) {
+    log::add($myModbusId, 'error', sprintf(__("** Installation ** : plugin non trouvé : %s", __FILE__), $pluginId));
+    die();
+  }
+  $plugin->setIsEnable(1);
+  $plugin->dependancy_install();
+  log::add($myModbusId, 'info', sprintf(__("** Installation ** : installation terminée : %s", __FILE__), $pluginId));
+}
+```
+
+Cette fonction installe la même version (bêta ou stable) que celle du plugin MyModbus. Elle est appelée dans les
+fonctions **mymodbus_install** et **mymodbus_update**.
 
 # Utilisation
 
@@ -148,7 +189,7 @@ exception est levée. Si ce paramètre n'est pas précisé, les virtualenv de to
 **$_pythonVersion**: (string) la version de python pour laquelle le virtualenv doit être recherché. Si ce paramètre
 n'est pas précisé, les virtualenv de toutes les versions de python seront listées.
 
-**$_suffix**: (string) le suffixe du virtualenv à rechercher. Si ce paramètre n'est pas précisé, tous les virtualenv de
+**$_suffix**: (string) le suffixe du virtualenv à rechercher. Si ce paramètre n'est pas précisé, tous les virtualenv
 seront listées.
 
 ### Valeur de retour
@@ -169,15 +210,18 @@ Retourne :
 ```php
 array (
   0 =>    array (
-    'name' => 'mymodbus++pymodbus3.2.2',
+    'fullname' => 'mymodbus++pymodbus3.2.2',
+    'suffix' => 'pymodbus3.2.2',
     'python' => '3.11.4'
   ),
   1 =>    array (
-    'name' => 'mymodbus++pymodbus3.5.2',
+    'fullname' => 'mymodbus++pymodbus3.5.2',
+    'suffix' => 'pymodbus3.5.2',
     'python' => '3.11.4'
   ),
   2 =>    array (
-    'name' => 'mymodbus++pymodbus3.6.4',
+    'fullname' => 'mymodbus++pymodbus3.6.4',
+    'suffix' => 'pymodbus3.6.4',
     'python' => '3.11.4'
     )
   )
