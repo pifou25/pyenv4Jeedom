@@ -306,12 +306,14 @@ class pyenv extends eqLogic {
     $virtualenvs = self::runPyenv('pyenv virtualenvs --skip-aliases --bare');
     foreach ($virtualenvs as $virtualenv) {
       [$version, , $virtualenvName] = explode('/', $virtualenv);
-      if ((!$_pluginId || strpos($virtualenvName, $_pluginId . self::$_SEPARATOR) === 0) &&
+      [$virtualenvPlugin, $virtualenvSuffix] = explode(self::$_SEPARATOR, $virtualenvName);
+      if ((!$_pluginId || $_pluginId === $virtualenvPlugin) &&
           (!$_pythonVersion || $version === $_pythonVersion) &&
-          (!$_suffix || strpos($virtualenvName, self::$_SEPARATOR . $_suffix) > 0))
+          (!$_suffix || $_suffix === $virtualenvSuffix))
         $ret[] = array(
-          'name' => $virtualenvName,
-          'python' => $version
+          'fullname'  => $virtualenvName,
+          'suffix'    => $virtualenvSuffix,
+          'python'    => $version
         );
     }
     return $ret;
