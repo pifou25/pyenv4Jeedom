@@ -20,9 +20,9 @@ if (!$plugin->isActive()) {
 	echo sprintf(__('<legend><i class="fas fa-cog"></i> {{Gestion de %s}}</legend>', __FILE__), $plugin->getName());
 	
 	$virtualenvNames = pyenv::getVirtualenvNames();
-	//log::add($pluginId, 'debug', __FILE__ . ' : $ret = ' . var_export($ret, true));
+	
 	if (count($virtualenvNames) === 0) {
-		echo '<p>' . __("Aucun virtualenv pyenv à afficher.") . '</p>';
+		echo '<p>' . __("Aucun virtualenv pyenv à afficher.", __FILE__) . '</p>';
 	} else {
 
 		log::add($pluginId, 'debug', __FILE__ . ' : $virtualenvNames = ' . var_export($virtualenvNames, true));
