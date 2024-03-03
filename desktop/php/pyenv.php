@@ -45,7 +45,7 @@ if (!$plugin->isActive()) {
 <?php
 
 		foreach ($virtualenvNames as $virtualenv) {
-			[$pluginId, $suffix] = explode(pyenv::$_SEPARATOR, $virtualenv['name']);
+			[$pluginId, $suffix] = explode(pyenv::SEPARATOR, $virtualenv['fullname']);
 			echo '<tr>';
 			echo '  <td>';
 			echo $pluginId;
