@@ -230,26 +230,14 @@ class pyenv extends eqLogic {
    */
   public static function runPyenv($_command, $_args='', $_virtualenv=null, $_daemon=false) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s', daemon = '%s'", $_command, $_args, $_virtualenv, $_daemon));
-    $script_file = '';
-    if (!$_daemon) {
-      $script_file = realpath(__DIR__ . '/../../ressources') . self::SCRIPT_TMP;
-      if (is_file($script_file))
-        throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . __("La commande ne peut être exécutée, une commande pyenv est en cours d'exécution.", __FILE__));
-    } else {
-      $script_file = tempnam(realpath(__DIR__ . '/../../ressources'), self::SCRIPT_TMP);
-      if (!is_null($_virtualenv) && !self::virtualenvIsInstalled($_virtualenv))
-          throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' n'est pas installé", __FILE__), $_virtualenv));
-    }
+    if ($_daemon && !is_null($_virtualenv) && !self::virtualenvIsInstalled($_virtualenv))
+      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' n'est pas installé", __FILE__), $_virtualenv));
     
     $script_content = self::sourceScript($_command, $_args, $_virtualenv, $_daemon);
     
-    if (file_put_contents($script_file, $script_content) === false)
-      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . __("Impossible de créer le script pour la commande pyenv.", __FILE__));
-    chmod($script_file, 0755);
     $output = array();
     $retval = null;
-    $ret = exec($script_file, $output, $retval);
-    unlink($script_file);
+    $ret = exec($script_content, $output, $retval);
     if ($ret === false)
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Erreur lors de l'exécution de la commande '%s'", __FILE__), $_command));
     foreach ($output as $row)
