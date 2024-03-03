@@ -73,11 +73,68 @@ function install_pyenv() {
   $plugin->setIsEnable(1);
   $plugin->dependancy_install();
   log::add($myModbusId, 'info', sprintf(__("** Installation ** : installation terminée : %s", __FILE__), $pluginId));
+
+  mymodbus::init_pyenv();
 }
 ```
 
 Cette fonction installe la même version (bêta ou stable) que celle du plugin MyModbus. Elle est appelée dans les
-fonctions **mymodbus_install** et **mymodbus_update**.
+fonctions **mymodbus_install** et **mymodbus_update**. A la fin, la fonction **init_pyenv** du plugin MyModbus est
+lancée.
+
+# Implémentation
+
+La fonction **init_pyenv** évoquée dans le chapitre [Installation du plugin](#installation-du-plugin) est la suivante :
+
+```php
+public static function init_pyenv() {
+  $requirements = array('requests', 'pyserial', 'pyudev', 'pymodbus==3.2.2');
+  try {
+    pyenv::createVirtualenv(__CLASS__, mymodbusConst::PYENV_PYTHON, implode("\n", $requirements), mymodbusConst::PYENV_SUFFIX);
+  } catch (Exception $e) {
+    // Déjà installé
+  }
+  
+  try {
+    $virtualenvs = pyenv::getVirtualenvNames(__CLASS__, mymodbusConst::PYENV_PYTHON, mymodbusConst::PYENV_SUFFIX);
+  } catch (Exception $e) {
+    throw new Exception(__('Impossible de lister les virtualenv du plugin pyenv4Jeedom', __FILE__));
+  }
+
+  $ret = null;
+
+  foreach ($virtualenvs as $virtualenv) {
+    if ($virtualenv['suffix'] !== mymodbusConst::PYENV_SUFFIX || $virtualenv['python'] !== mymodbusConst::PYENV_PYTHON) {
+      try {
+        pyenv::deleteVirtualenv(__CLASS__, $virtualenv['suffix']);
+      } catch (Exception $e) {
+        throw new Exception(sprintf(__("Impossible de supprimer le virtualenv avec le suffixe '%s' du plugin pyenv4Jeedom", __FILE__), $virtualenv['suffix']));
+      }
+    } else {
+      $ret = $virtualenv['fullname'];
+    }
+  }
+  return $ret;
+}
+```
+
+Elle crée le virtualenv nécessaire à MyModbus et supprime es autres virtualenv installés par MyModbus.
+
+Le lancement du démon se fait de la manière suivante .
+
+```php
+$virtualenv = self::init_pyenv();
+if (is_null($virtualenv))
+  throw new Exception(__('L\'environnement pyenv n\'a pas pu être installé', __FILE__));
+
+// Création des valeurs d'argument avec escapeshellarg()
+
+$script = realpath(__DIR__ . '/../../ressources/mymodbusd/mymodbusd.py');
+$args = '--socketport ' . $socketPort . ' --loglevel ' . $daemonLoglevel . ' --apikey ' . $daemonApikey . ' --callback ' . $daemonCallback . ' --json ' . $jsonEqConfig;
+
+log::add('mymodbus', 'info', 'Lancement du démon mymodbus : ' . $script);
+$result = pyenv::runPyenv($script, $args, $virtualenv, true);
+```
 
 # Utilisation
 
