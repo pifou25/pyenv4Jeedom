@@ -5,6 +5,7 @@
 > que seule la documantation a été mise à jour.
 
 ## TODO
+- Corriger le script **post-install.sh** pour que la mise à jour se fasse correctement
 - Suppression manuelle des virtualenv
 
 ## 05/03/2024 V0.2 beta

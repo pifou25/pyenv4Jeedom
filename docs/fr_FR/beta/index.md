@@ -119,7 +119,7 @@ public static function init_pyenv() {
 }
 ```
 
-Elle crée le virtualenv nécessaire à MyModbus et supprime es autres virtualenv installés par MyModbus.
+Elle crée le virtualenv nécessaire à MyModbus et supprime les autres virtualenv installés par MyModbus.
 
 Le lancement du démon se fait de la manière suivante :
 
