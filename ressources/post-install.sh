@@ -52,7 +52,6 @@ EOF
 sudo -E -u www-data sh $PYENV_UPDATE
 chown -R www-data:www-data "$PYENV_ROOT"
 rm $PYENV_UPDATE
-fi
 
 echo 90 > "$PROGRESS_FILE"
 

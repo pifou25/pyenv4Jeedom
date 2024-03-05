@@ -19,6 +19,14 @@ if (!$plugin->isActive()) {
 
 	echo sprintf(__('<legend><i class="fas fa-cog"></i> {{Gestion de %s}}</legend>', __FILE__), $plugin->getName());
 	
+	pyenv::init();
+
+	$eqLogic = pyenv::byLogicalId($pluginId, $pluginId);
+	$lock = $eqLogic->getConfiguration(pyenv::LOCK);
+	log::add($pluginId, 'debug', __FILE__ . ' : $lock = ' . var_export($lock, true));
+
+	return;
+
 	$virtualenvNames = pyenv::getVirtualenvNames();
 	
 	if (count($virtualenvNames) === 0) {
