@@ -88,6 +88,7 @@ La fonction **init_pyenv** évoquée dans le chapitre [Installation du plugin](#
 
 ```php
 public static function init_pyenv() {
+  pyenv::init();
   $requirements = array('requests', 'pyserial', 'pyudev', 'pymodbus==3.2.2');
   try {
     pyenv::createVirtualenv(__CLASS__, mymodbusConst::PYENV_PYTHON, implode("\n", $requirements), mymodbusConst::PYENV_SUFFIX);

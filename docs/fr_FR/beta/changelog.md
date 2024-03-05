@@ -12,6 +12,7 @@
 - Amélioration des messages de log debug
 - Ajout du paramètre *$_lock* à runPyenv pour empêcher l'exécution d'autres commandes parce que `pyenv install ...`
 pouvait être lancé plusieurs fois en même temps
+- Documentation à jour
 
 ## 03/03/2024 V0.1 beta (Version initiale)
 - Commandes uniquement via script php depuis un autre plugin :
