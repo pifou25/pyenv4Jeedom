@@ -172,7 +172,7 @@ class pyenv extends eqLogic {
    * Crée un virtualenv pour un plugin et installe les modules
    */
   public static function createVirtualenv($_pluginId, $_pythonVersion, $_requirements, $_suffix='none', $_upgrade=false) {
-    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * pluginId = '%s', pythonVersion = '%s', requirements = '%s', suffix = '%s'", $_pluginId, $_pythonVersion, $_requirements, $_suffix));
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * pluginId = '%s', pythonVersion = '%s', requirements = '%s', suffix = '%s', upgrade = '%s'", $_pluginId, $_pythonVersion, $_requirements, $_suffix, var_export($_upgrade, true)));
     if (self::virtualenvIsInstalled($_pluginId . self::SEPARATOR . $_suffix)) {
       if ($_upgrade)
         self::deleteVirtualenv($_pluginId, $_suffix);
@@ -232,17 +232,17 @@ class pyenv extends eqLogic {
    * Exécute une commande pyenv
    */
   public static function runPyenv($_command, $_args='', $_virtualenv=null, $_daemon=false, $_lock=false) {
-    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s', daemon = '%s', lock = '%s'", $_command, $_args, $_virtualenv, $_daemon, $_lock));
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s', daemon = '%s', lock = '%s'", $_command, $_args, var_export($_virtualenv, true), var_export($_daemon, true), var_export($_lock, true)));
     $eqLogic = self::byLogicalId(__CLASS__, __CLASS__);
-    if ($eqLogic->getConfiguration(self::LOCK, 'false') === 'true')
+    if ($eqLogic->getConfiguration(self::LOCK, 'false') !== 'false')
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . __("La commande ne peut pas être exécutée, une commande pyenv bloquante est en cours d'exécution.", __FILE__));
     
-    if ($_daemon && !is_null($_virtualenv) && !self::virtualenvIsInstalled($_virtualenv))
+    if (!is_null($_virtualenv) && !self::virtualenvIsInstalled($_virtualenv))
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' n'est pas installé", __FILE__), $_virtualenv));
     
     $script_content = self::sourceScript($_command, $_args, $_virtualenv, $_daemon);
     
-    if ($_lock === true) {
+    if ($_lock !== false) {
       $eqLogic->setConfiguration(self::LOCK, 'true');
       $eqLogic->save();
     }
@@ -251,13 +251,15 @@ class pyenv extends eqLogic {
     $retval = null;
     $ret = exec($script_content, $output, $retval);
     
-    $eqLogic->setConfiguration(self::LOCK, 'false');
-    $eqLogic->save();
+    if ($eqLogic->getConfiguration(self::LOCK, 'true') !== 'false') {
+      $eqLogic->setConfiguration(self::LOCK, 'false');
+      $eqLogic->save();
+    }
 
     if ($ret === false)
-      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Erreur lors de l'exécution de la commande '%s'", __FILE__), $_command));
+      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Erreur lors de l'exécution de la commande '%s %s'", __FILE__), $_command, $_args));
     foreach ($output as $row)
-      log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * %s", $row));
+      log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" -> %s", $row));
     return $output;
   }
 
@@ -265,7 +267,7 @@ class pyenv extends eqLogic {
    * Retourne le contenu du script à exécuter pour être dans un environnement pyenv
    */
   public static function sourceScript($_command, $_args='', $_virtualenv=null, $_daemon=false) {
-    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s', daemon = '%s'", $_command, $_args, $_virtualenv, $_daemon));
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s', daemon = '%s'", $_command, $_args, var_export($_virtualenv, true), var_export($_daemon, true)));
     $ret = file(realpath(__DIR__ . '/../../ressources') . self::SHELL_INIT);
     if (is_file($_command)) {
       $dirname = dirname($_command);

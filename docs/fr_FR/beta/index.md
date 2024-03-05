@@ -289,10 +289,11 @@ array (
 ### Description
 
 ```php
-pyenv::runPyenv($_command, $_args='', $_virtualenv=null, $_daemon=false);
+pyenv::runPyenv($_command, $_args='', $_virtualenv=null, $_daemon=false, $_lock=false);
 ```
 
-**pyenv::runPyenv** lance une commande dans l'environnement pyenv.
+**pyenv::runPyenv** lance une commande dans l'environnement pyenv. Il est possible de préciser un virtualenv, de
+préciser que la commande doit être lancée comme un démon, auquel cas un virtualenv doit être spécifié.
 
 ### Liste des paramètres
 
@@ -305,6 +306,9 @@ répertoire du fichier avant d'exécuter la commande.
 l'équivalent de `exec($_commande . ' ' . $_args)`.
 
 **$_daemon**: (boolean) mode démon. Avec un virtualenv, la sortie du script est redirigée vers le log du plugin.
+
+**$_lock_**: (boolean) commande bloquante. Si *$_lock* vaut `true`, aucune autre commande ne pourra être exécutée via
+**pyenv::runPyenv**
 
 ### Valeur de retour
 

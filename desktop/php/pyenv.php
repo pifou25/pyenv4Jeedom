@@ -21,10 +21,6 @@ if (!$plugin->isActive()) {
 	
 	pyenv::init();
 
-	$eqLogic = pyenv::byLogicalId($pluginId, $pluginId);
-	$lock = $eqLogic->getConfiguration(pyenv::LOCK);
-	log::add($pluginId, 'debug', __FILE__ . ' : $lock = ' . var_export($lock, true));
-
 	$virtualenvNames = pyenv::getVirtualenvNames();
 	
 	if (count($virtualenvNames) === 0) {

@@ -7,6 +7,12 @@
 ## TODO
 - Suppression manuelle des virtualenv
 
+## 05/03/2024 V0.2 beta
+- Correction d'une erreur de syntaxe dans post-install.sh
+- Amélioration des messages de log debug
+- Ajout du paramètre *$_lock* à runPyenv pour empêcher l'exécution d'autres commandes parce que `pyenv install ...`
+pouvait être lancé plusieurs fois en même temps
+
 ## 03/03/2024 V0.1 beta (Version initiale)
 - Commandes uniquement via script php depuis un autre plugin :
   - Possibilité de créer des virtualenv dans la version python souhaitée
