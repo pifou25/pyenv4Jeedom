@@ -317,8 +317,8 @@ l'équivalent de `exec($_commande . ' ' . $_args)`.
 
 **$_daemon**: (boolean) mode démon. Avec un virtualenv, la sortie du script est redirigée vers le log du plugin.
 
-**$_lock_**: (boolean) commande bloquante. Si *$_lock* vaut `true`, aucune autre commande ne pourra être exécutée via
-**pyenv::runPyenv**
+**$_lock_**: (boolean) commande bloquante. Si *$_lock* vaut `true`, aucune autre commande avec *$_lock* à `true` ne
+pourra être exécutée via **pyenv::runPyenv**
 
 ### Valeur de retour
 
@@ -353,7 +353,7 @@ Identique à **pyenv::runPyenv**.
 
 ### Valeur de retour
 
-Retourne contenu d'un script shell (sans la ligne shebang) pour exécuter la commande sous forme de string.
+Retourne le contenu d'un script shell (sans la ligne shebang) pour exécuter la commande passée en paramètre.
 
 ### Exemple
 
@@ -362,7 +362,7 @@ Retourne contenu d'un script shell (sans la ligne shebang) pour exécuter la com
 $args = '-a -b "valeur"';
 $virtualenvs = pyenv::getVirtualenvNames('mymodbus', '3.11.4', 'pymodbus3.2.2');
 try {
-  $script = pyenv::sourceScript(realpath(__DIR__ . '/../../ressources/super_script.py'), $args, $virtualenvs[0]['name']);
+  $script = pyenv::sourceScript(realpath(__DIR__ . '/../../ressources/super_script.py'), $args, $virtualenvs[0]['fullname']);
 } catch (Exception $e) {
   
 }
