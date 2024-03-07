@@ -20,9 +20,12 @@ if (!$plugin->isActive()) {
 	echo sprintf(__('<legend><i class="fas fa-cog"></i> {{Gestion de %s}}</legend>', __FILE__), $plugin->getName());
 	
 	pyenv::init();
-
-	$virtualenvNames = pyenv::getVirtualenvNames();
 	
+	$eqLogic = pyenv::byLogicalId($pluginId, $pluginId);
+	if ($eqLogic->getConfiguration(pyenv::LOCK, 'false') !== 'false')
+		echo '<p>' . __("Une commande bloquante est en cours d'exécution :", __FILE__) . pyenv::LOCKING_CMD . '</p>';
+	
+	$virtualenvNames = pyenv::getVirtualenvNames();
 	if (count($virtualenvNames) === 0) {
 		echo '<p>' . __("Aucun virtualenv pyenv à afficher.", __FILE__) . '</p>';
 	} else {

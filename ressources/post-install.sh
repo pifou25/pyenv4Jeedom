@@ -43,31 +43,14 @@ if [ ! -d "$PYENV_ROOT" ]; then
   chown -R www-data:www-data "$PYENV_ROOT"
 fi
 
-echo "********************************************************"
-echo "** Mise à jour de pyenv"
-cat > $PYENV_UPDATE << EOF
-$pyenv_bashrc
-pyenv update
-EOF
-sudo -E -u www-data sh $PYENV_UPDATE
-chown -R www-data:www-data "$PYENV_ROOT"
-rm $PYENV_UPDATE
-
 echo 90 > "$PROGRESS_FILE"
 
-echo "********************************************************"
-echo "** Préparation de l'environnement shell pour root et www-data"
+# Nettoyage des fichiers .bashrc si pyenv4Jeedom a été installé avec une version précédente
 grep -vi pyenv ~/.bashrc > "$TMP_FILE"
 cat "$TMP_FILE" > ~/.bashrc
-cat >> ~/.bashrc<< EOF
-$pyenv_bashrc
-EOF
 
 sudo -E -u www-data grep -vi pyenv ~www-data/.bashrc > "$TMP_FILE"
 cat "$TMP_FILE" > ~www-data/.bashrc
-sudo -E -u www-data cat >> ~www-data/.bashrc<< EOF
-$pyenv_bashrc
-EOF
 
 echo 100 > "$PROGRESS_FILE"
 rm "$TMP_FILE"

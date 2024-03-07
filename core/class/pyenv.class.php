@@ -42,60 +42,9 @@ class pyenv extends eqLogic {
   const SEPARATOR = '++';
 
   const LOCK = 'lock';
+  const LOCKING_CMD = 'locking_cmd';
 
   /*     * ***********************Methode static*************************** */
-
-  /*
-  * Fonction exécutée automatiquement toutes les minutes par Jeedom
-  public static function cron() {}
-  */
-
-  /*
-  * Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
-  public static function cron5() {}
-  */
-
-  /*
-  * Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
-  public static function cron10() {}
-  */
-
-  /*
-  * Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
-  public static function cron15() {}
-  */
-
-  /*
-  * Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
-  public static function cron30() {}
-  */
-
-  /*
-  * Fonction exécutée automatiquement toutes les heures par Jeedom
-  public static function cronHourly() {}
-  */
-
-  /*
-  * Fonction exécutée automatiquement tous les jours par Jeedom
-  public static function cronDaily() {}
-  */
-  
-  /*
-  * Permet de déclencher une action avant modification d'une variable de configuration du plugin
-  * Exemple avec la variable "param3"
-  public static function preConfig_param3( $value ) {
-    // do some checks or modify on $value
-    return $value;
-  }
-  */
-
-  /*
-  * Permet de déclencher une action après modification d'une variable de configuration du plugin
-  * Exemple avec la variable "param3"
-  public static function postConfig_param3($value) {
-    // no return value
-  }
-  */
 
   /*
    * Permet d'indiquer des éléments supplémentaires à remonter dans les informations de configuration
@@ -107,7 +56,6 @@ class pyenv extends eqLogic {
 
   /*
    * Initialise le plugin en créant un équipement fictif
-   * TODO: Voir si cet équipement est utile
    */
   public static function init() {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
@@ -118,6 +66,7 @@ class pyenv extends eqLogic {
       $eqLogic->setLogicalId(__CLASS__);
       $eqLogic->setEqType_name(__CLASS__);
       $eqLogic->setConfiguration(self::LOCK, 'false');
+      $eqLogic->setConfiguration(self::LOCKING_CMD, '');
       $eqLogic->setIsEnable(0);
       $eqLogic->setIsVisible(0);
       $eqLogic->save();
@@ -138,27 +87,29 @@ class pyenv extends eqLogic {
   static function installPython($_version) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
     if (self::pythonIsInstalled($_version))
-      return;
+    return;
+  
+  self::updatePyenv();
+  $python_build = self::runPyenv(realpath(__DIR__ . '/../../ressources') . self::PYTHON_BUILD, '--definitions');
+  if (!in_array($_version, $python_build))
+    throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("La version python '%s' n'est pas disponible à l'installation", __FILE__), $_version));
 
-    self::updatePyenv();
-    $python_build = self::runPyenv(realpath(__DIR__ . '/../../ressources') . self::PYTHON_BUILD, '--definitions');
-    if (!in_array($_version, $python_build))
-      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("La version python '%s' n'est pas disponible à l'installation", __FILE__), $_version));
-    
-    $arg = sprintf('install %s', $_version);
-    self::runPyenv('pyenv', $arg, null, false, true);
+  $arg = sprintf('install %s', $_version);
+  self::runPyenv('pyenv', $arg, null, false, true);
+  log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Python version '%s' installée", __FILE__), $_version));
+}
+
+/*
+* Désinstalle une version de python
+*/
+static function uninstallPython($_version) {
+  log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
+  $arg = sprintf('uninstall -f %s', $_version);
+  log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Python version '%s' désinstallée", __FILE__), $_version));
+  if (self::pythonIsInstalled($_version))
+  self::runPyenv('pyenv', $arg, null, false, true);
   }
-
-  /*
-   * Désinstalle une version de python
-   */
-  static function uninstallPython($_version) {
-    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
-    $arg = sprintf('uninstall -f %s', $_version);
-    if (self::pythonIsInstalled($_version))
-      self::runPyenv('pyenv', $arg, null, false, true);
-  }
-
+  
   /*
    * Vérifie si un plugin exste
    */
@@ -167,15 +118,15 @@ class pyenv extends eqLogic {
     $list_plugins = plugin::listPlugin(false, false, false, true); // Liste des id des plugins installés
     return in_array($_pluginId, $list_plugins);
   }
-
+  
   /*
-   * Crée un virtualenv pour un plugin et installe les modules
-   */
+  * Crée un virtualenv pour un plugin et installe les modules
+  */
   public static function createVirtualenv($_pluginId, $_pythonVersion, $_requirements, $_suffix='none', $_upgrade=false) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * pluginId = '%s', pythonVersion = '%s', requirements = '%s', suffix = '%s', upgrade = '%s'", $_pluginId, $_pythonVersion, $_requirements, $_suffix, var_export($_upgrade, true)));
     if (self::virtualenvIsInstalled($_pluginId . self::SEPARATOR . $_suffix)) {
       if ($_upgrade)
-        self::deleteVirtualenv($_pluginId, $_suffix);
+      self::deleteVirtualenv($_pluginId, $_suffix);
       else
         throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le virtualenv '%s' existe déjà", __FILE__), $_pluginId . self::SEPARATOR . $_suffix));
     }
@@ -183,7 +134,7 @@ class pyenv extends eqLogic {
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le plugin '%s' n'existe pas", __FILE__), $_pluginId));
     if (strpos($_suffix, self::SEPARATOR))
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Le suffixe '%s' n'est pas valide", __FILE__), $_suffix));
-
+    
     self::installPython($_pythonVersion);
     
     $requirements_content = '';
@@ -195,12 +146,14 @@ class pyenv extends eqLogic {
     $requirements_txt = realpath(__DIR__ . '/../../ressources') . self::REQUIREMENTS;
     if (file_put_contents($requirements_txt, $requirements_content) === false)
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Impossible de créer le fichier '%s'", __FILE__), $requirements_txt));
-
+    
     $arg = sprintf('virtualenv %s %s', $_pythonVersion, $_pluginId . self::SEPARATOR . $_suffix);
     self::runPyenv('pyenv', $arg, null, false, true);
+    log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("virtualenv '%s' installé", __FILE__), $_pluginId . self::SEPARATOR . $_suffix));
     
     $arg = sprintf('exec pip install -r "%s"', $requirements_txt);
     self::runPyenv('pyenv', $arg, $_pluginId . self::SEPARATOR . $_suffix, false, true);
+    log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Dépendances dans le virtualenv '%s' installées", __FILE__), $_pluginId . self::SEPARATOR . $_suffix));
     unlink($requirements_txt);
   }
 
@@ -221,9 +174,11 @@ class pyenv extends eqLogic {
     }
     $arg = sprintf('virtualenvs --skip-aliases --bare | grep %1$s | grep -v %1$s++%2$s', $_pluginId, $_suffix);
     $virtualenvs = self::runPyenv('pyenv', $arg);
-    $arg = sprintf('virtualenv-delete -f %s', $_pluginId . self::SEPARATOR . $_suffix);
-    if (self::virtualenvIsInstalled($_pluginId . self::SEPARATOR . $_suffix))
+    if (self::virtualenvIsInstalled($_pluginId . self::SEPARATOR . $_suffix)) {
+      $arg = sprintf('virtualenv-delete -f %s', $_pluginId . self::SEPARATOR . $_suffix);
       self::runPyenv('pyenv', $arg, null, false, true);
+      log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("virtualenv '%s' supprimé", __FILE__), $_pluginId . self::SEPARATOR . $_suffix));
+    }
     if (count($virtualenvs) === 0 && !is_null($pythonVersion))
       self::uninstallPython($pythonVersion);
   }
@@ -234,7 +189,7 @@ class pyenv extends eqLogic {
   public static function runPyenv($_command, $_args='', $_virtualenv=null, $_daemon=false, $_lock=false) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s', daemon = '%s', lock = '%s'", $_command, $_args, var_export($_virtualenv, true), var_export($_daemon, true), var_export($_lock, true)));
     $eqLogic = self::byLogicalId(__CLASS__, __CLASS__);
-    if ($eqLogic->getConfiguration(self::LOCK, 'false') !== 'false')
+    if ($_lock !== false && $eqLogic->getConfiguration(self::LOCK, 'false') !== 'false')
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . __("La commande ne peut pas être exécutée, une commande pyenv bloquante est en cours d'exécution.", __FILE__));
     
     if (!is_null($_virtualenv) && !self::virtualenvIsInstalled($_virtualenv))
@@ -244,6 +199,7 @@ class pyenv extends eqLogic {
     
     if ($_lock !== false) {
       $eqLogic->setConfiguration(self::LOCK, 'true');
+      $eqLogic->setConfiguration(self::LOCKING_CMD, sprintf('%s %s', $_command, $_args));
       $eqLogic->save();
     }
 
@@ -251,8 +207,9 @@ class pyenv extends eqLogic {
     $retval = null;
     $ret = exec($script_content, $output, $retval);
     
-    if ($eqLogic->getConfiguration(self::LOCK, 'true') !== 'false') {
+    if ($_lock !== false && $eqLogic->getConfiguration(self::LOCK, 'true') !== 'false') {
       $eqLogic->setConfiguration(self::LOCK, 'false');
+      $eqLogic->setConfiguration(self::LOCKING_CMD, '');
       $eqLogic->save();
     }
 
@@ -387,17 +344,6 @@ class pyenv extends eqLogic {
   }
 
   /*
-  * Permet de crypter/décrypter automatiquement des champs de configuration des équipements
-  * Exemple avec le champ "Mot de passe" (password)
-  public function decrypt() {
-    $this->setConfiguration('password', utils::decrypt($this->getConfiguration('password')));
-  }
-  public function encrypt() {
-    $this->setConfiguration('password', utils::encrypt($this->getConfiguration('password')));
-  }
-  */
-
-  /*
   * Permet de modifier l'affichage du widget (également utilisable par les commandes)
   public function toHtml($_version = 'dashboard') {}
   */
@@ -408,21 +354,9 @@ class pyenv extends eqLogic {
 class pyenvCmd extends cmd {
   /*     * *************************Attributs****************************** */
 
-  /*
-  public static $_widgetPossibility = array();
-  */
-
   /*     * ***********************Methode static*************************** */
 
-
   /*     * *********************Methode d'instance************************* */
-
-  /*
-  * Permet d'empêcher la suppression des commandes même si elles ne sont pas dans la nouvelle configuration de l'équipement envoyé en JS
-  public function dontRemoveCmd() {
-    return true;
-  }
-  */
 
   // Exécution d'une commande
   public function execute($_options = array()) {

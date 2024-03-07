@@ -1,7 +1,7 @@
 {
 	"id": "pyenv",
 	"name": "pyenv4Jeedom",
-	"pluginVersion": "0.2 beta",
+	"pluginVersion": "0.3 beta",
 	"description": {
 		"fr_FR": "Implémentation de pyenv pour Jeedom"
 	},

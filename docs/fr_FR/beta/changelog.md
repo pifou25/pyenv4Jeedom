@@ -8,6 +8,12 @@
 - Corriger le script **post-install.sh** pour que la mise à jour se fasse correctement
 - Suppression manuelle des virtualenv
 
+## 07/03/2024 V0.3 beta
+- Nettoyage des fichiers .bashrc si pyenv4Jeedom a été installé avec une version précédente
+- Pas de mise à jour de pyenv dans post-install.sh puisque la mise à jour est faite avant l'installation d'un
+virtualenv
+- Ajout d'une information sur la page du plugin si une commande bloquante est en cours
+
 ## 05/03/2024 V0.2 beta
 - Correction d'une erreur de syntaxe dans post-install.sh
 - Amélioration des messages de log debug

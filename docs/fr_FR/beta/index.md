@@ -128,7 +128,16 @@ $virtualenv = self::init_pyenv();
 if (is_null($virtualenv))
   throw new Exception(__('L\'environnement pyenv n\'a pas pu être installé', __FILE__));
 
+$eqPyenv = pyenv::byLogicalId('pyenv', 'pyenv');
+if (!is_object($eqPyenv))
+  throw new Exception(__('pyenv4Jeedom n\'a pas été initialisé correctement', __FILE__));
+
+if ($eqPyenv->getConfiguration(pyenv::LOCK, 'false') !== 'false')
+  throw new Exception(__('Une commande pyenv bloquante est en cours d\'exécution', __FILE__));
+
 // Création des valeurs d'argument avec escapeshellarg()
+// ...
+// ...
 
 $script = realpath(__DIR__ . '/../../ressources/mymodbusd/mymodbusd.py');
 $args = '--socketport ' . $socketPort . ' --loglevel ' . $daemonLoglevel . ' --apikey ' . $daemonApikey . ' --callback ' . $daemonCallback . ' --json ' . $jsonEqConfig;
