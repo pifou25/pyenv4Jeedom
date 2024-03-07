@@ -331,7 +331,7 @@ Ne retourne rien en mode démon.
 $args = '-a -b "valeur"';
 $virtualenvs = pyenv::getVirtualenvNames('mymodbus', '3.11.4', 'pymodbus3.2.2');
 try {
-  pyenv::runPyenv(realpath(__DIR__ . '/../../ressources/super_script.py'), $args, $virtualenvs[0]['name']);
+  pyenv::runPyenv(realpath(__DIR__ . '/../../ressources/super_script.py'), $args, $virtualenvs[0]['fullname']);
 } catch (Exception $e) {
   
 }
