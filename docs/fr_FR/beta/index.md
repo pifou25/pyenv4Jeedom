@@ -285,16 +285,19 @@ Retourne :
 array (
   0 =>    array (
     'fullname' => 'mymodbus++pymodbus3.2.2',
+    'pluginId' => 'mymodbus',
     'suffix' => 'pymodbus3.2.2',
     'python' => '3.11.4'
   ),
   1 =>    array (
     'fullname' => 'mymodbus++pymodbus3.5.2',
+    'pluginId' => 'mymodbus',
     'suffix' => 'pymodbus3.5.2',
     'python' => '3.11.4'
   ),
   2 =>    array (
     'fullname' => 'mymodbus++pymodbus3.6.4',
+    'pluginId' => 'mymodbus',
     'suffix' => 'pymodbus3.6.4',
     'python' => '3.11.4'
     )
@@ -375,3 +378,6 @@ try {
 }
 ```
 
+# Informations de fonctionnement
+
+La page du plugin et la page santé du plugin donnent des informations utiles sur l'état du plugin.

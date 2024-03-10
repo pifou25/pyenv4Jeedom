@@ -56,16 +56,15 @@ if (!$plugin->isActive()) {
 <?php
 
 		foreach ($virtualenvNames as $virtualenv) {
-			[$pluginId, $suffix] = explode(pyenv::SEPARATOR, $virtualenv['fullname']);
 			echo '<tr>';
 			echo '  <td>';
-			echo $pluginId;
+			echo $virtualenv['pluginId'];
 			echo '  </td>';
 			echo '  <td>';
 			echo $virtualenv['python'];
 			echo '  </td>';
 			echo '  <td>';
-			echo $suffix;
+			echo $virtualenv['suffix'];
 			echo '  </td>';
 			echo '  <td>';
 			echo '		<input type="checkbox" id="' . $virtualenv['fullname'] . '" name="virtualenv">';

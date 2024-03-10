@@ -87,27 +87,27 @@ class pyenv extends eqLogic {
   static function installPython($_version) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
     if (self::pythonIsInstalled($_version))
-    return;
-  
-  self::updatePyenv();
-  $python_build = self::runPyenv(realpath(__DIR__ . '/../../ressources') . self::PYTHON_BUILD, '--definitions');
-  if (!in_array($_version, $python_build))
-    throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("La version python '%s' n'est pas disponible à l'installation", __FILE__), $_version));
+      return;
+    
+    self::updatePyenv();
+    $python_build = self::runPyenv(realpath(__DIR__ . '/../../ressources') . self::PYTHON_BUILD, '--definitions');
+    if (!in_array($_version, $python_build))
+      throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("La version python '%s' n'est pas disponible à l'installation", __FILE__), $_version));
 
-  $arg = sprintf('install %s', $_version);
-  self::runPyenv('pyenv', $arg, null, false, true);
-  log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Python version '%s' installée", __FILE__), $_version));
-}
+    $arg = sprintf('install %s', $_version);
+    self::runPyenv('pyenv', $arg, null, false, true);
+    log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Python version '%s' installée", __FILE__), $_version));
+  }
 
-/*
-* Désinstalle une version de python
-*/
-static function uninstallPython($_version) {
-  log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
-  $arg = sprintf('uninstall -f %s', $_version);
-  log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Python version '%s' désinstallée", __FILE__), $_version));
-  if (self::pythonIsInstalled($_version))
-  self::runPyenv('pyenv', $arg, null, false, true);
+  /*
+  * Désinstalle une version de python
+  */
+  static function uninstallPython($_version) {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
+    $arg = sprintf('uninstall -f %s', $_version);
+    log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Python version '%s' désinstallée", __FILE__), $_version));
+    if (self::pythonIsInstalled($_version))
+      self::runPyenv('pyenv', $arg, null, false, true);
   }
   
   /*
@@ -274,6 +274,7 @@ static function uninstallPython($_version) {
           (!$_suffix || $_suffix === $virtualenvSuffix))
         $ret[] = array(
           'fullname'  => $virtualenvName,
+          'pluginId'  => $virtualenvPlugin,
           'suffix'    => $virtualenvSuffix,
           'python'    => $version
         );
@@ -299,6 +300,39 @@ static function uninstallPython($_version) {
     return [
       'ressources/pyenv'
     ];
+  }
+
+  /*
+   * Informations pour la page santé
+   */
+  public static function health() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
+    $ret = array();
+    $lock = array();
+    $eqLogic = self::byLogicalId(__CLASS__, __CLASS__);
+    $lock['test'] = __("Commande bloquante en cours", __FILE__);
+    $lock['result'] = $eqLogic->getConfiguration(self::LOCKING_CMD, 'Aucune');
+    $lock['state'] = ($eqLogic->getConfiguration(self::LOCK, 'false') !== 'false') ? 'nok' : 'ok';
+    $ret[] = $lock;
+
+    $virtualenvNames = self::getVirtualenvNames();
+    foreach ($virtualenvNames as $virtualenv) {
+      $health = array();
+      $result = self::runPyenv('python', '--version', $virtualenv['fullname']);
+      $output = array();
+      $retval = null;
+      $ret_exec = exec(sprintf('ps ax | grep %s | grep -v grep', $virtualenv['fullname']), $output, $retval);
+      $info = '';
+      if (count($output) > 0) {
+        $info = ' - ' . __("En cours d'utilisation", __FILE__);
+      }
+      $health['test'] = sprintf(__("Plugin '%s', virtualenv '%s'", __FILE__), $virtualenv['pluginId'], $virtualenv['suffix']);
+      $health['result'] = $result[0] . $info;
+      $health['advice'] = $virtualenv['fullname'];
+      $health['state'] = ($result[0] === sprintf('Python %s', $virtualenv['python'])) ? 'ok' : 'nok';
+      $ret[] = $health;
+    }
+    return $ret;
   }
 
   /*     * *********************Méthodes d'instance************************* */

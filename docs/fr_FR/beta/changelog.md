@@ -7,6 +7,9 @@
 ## TODO
 - Corriger le script **post-install.sh** pour que la mise à jour se fasse correctement
 
+## 10/03/2024 V0.5 beta
+- Ajout des infos de santé
+
 ## 10/03/2024 V0.4 beta
 - Suppression manuelle des virtualenv possible depuis la page du plugin
 - Correction de l'information sur la page du plugin si une commande bloquante est en cours
