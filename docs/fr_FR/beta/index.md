@@ -99,7 +99,8 @@ public static function init_pyenv() {
   try {
     $virtualenvs = pyenv::getVirtualenvNames(__CLASS__, mymodbusConst::PYENV_PYTHON, mymodbusConst::PYENV_SUFFIX);
   } catch (Exception $e) {
-    throw new Exception(__('Impossible de lister les virtualenv du plugin pyenv4Jeedom', __FILE__));
+    log::add('mymodbus', 'error', __('Impossible de lister les virtualenv du plugin pyenv4Jeedom', __FILE__));
+    return;
   }
 
   $ret = null;
@@ -109,7 +110,7 @@ public static function init_pyenv() {
       try {
         pyenv::deleteVirtualenv(__CLASS__, $virtualenv['suffix']);
       } catch (Exception $e) {
-        throw new Exception(sprintf(__("Impossible de supprimer le virtualenv avec le suffixe '%s' du plugin pyenv4Jeedom", __FILE__), $virtualenv['suffix']));
+        log::add('mymodbus', 'error', sprintf(__("Impossible de supprimer le virtualenv avec le suffixe '%s' du plugin pyenv4Jeedom", __FILE__), $virtualenv['suffix']));
       }
     } else {
       $ret = $virtualenv['fullname'];
@@ -125,15 +126,21 @@ Le lancement du démon se fait de la manière suivante :
 
 ```php
 $virtualenv = self::init_pyenv();
-if (is_null($virtualenv))
-  throw new Exception(__('L\'environnement pyenv n\'a pas pu être installé', __FILE__));
+if (is_null($virtualenv)) {
+  log::add('mymodbus', 'error', __('L\'environnement pyenv n\'a pas pu être installé, vérifiez la page de pyenv4Jeedom', __FILE__));
+  return;
+}
 
 $eqPyenv = pyenv::byLogicalId('pyenv', 'pyenv');
-if (!is_object($eqPyenv))
-  throw new Exception(__('pyenv4Jeedom n\'a pas été initialisé correctement', __FILE__));
+if (!is_object($eqPyenv)) {
+  log::add('mymodbus', 'error', __('pyenv4Jeedom n\'a pas été initialisé correctement', __FILE__));
+  return;
+}
 
-if ($eqPyenv->getConfiguration(pyenv::LOCK, 'false') !== 'false')
-  throw new Exception(__('Une commande pyenv bloquante est en cours d\'exécution', __FILE__));
+if ($eqPyenv->getConfiguration(pyenv::LOCK, 'false') !== 'false') {
+  log::add('mymodbus', 'error', __('Une commande pyenv bloquante est en cours d\'exécution', __FILE__));
+  return;
+}
 
 // Création des valeurs d'argument avec escapeshellarg()
 // ...
