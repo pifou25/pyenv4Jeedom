@@ -21,9 +21,13 @@ if (!$plugin->isActive()) {
 	
 	pyenv::init();
 	
+	$pyenv_version = pyenv::runPyenv('pyenv', '--version');
+	echo '<p>' . sprintf(__("Version de pyenv : %s", __FILE__), $pyenv_version[0]) . '</p>';
+
+
 	$eqLogic = pyenv::byLogicalId($pluginId, $pluginId);
 	if ($eqLogic->getConfiguration(pyenv::LOCK, 'false') !== 'false')
-		echo '<p>' . __("Une commande bloquante est en cours d'exécution :", __FILE__) . pyenv::LOCKING_CMD . '</p>';
+		echo '<p>' . sprintf(__("Une commande bloquante est en cours d'exécution : '%s'", __FILE__), $eqLogic->getConfiguration(pyenv::LOCKING_CMD, '')) . '</p>';
 	
 	$virtualenvNames = pyenv::getVirtualenvNames();
 	if (count($virtualenvNames) === 0) {
@@ -37,15 +41,17 @@ if (!$plugin->isActive()) {
 		
 ?>
 
-<table id="table_virtualenv">
-	<thead>
-		<tr>
-			<th style="min-width:200px;width:300px;">{{PluginId}}</th>
-			<th style="min-width:200px;width:300px;">{{Version python}}</th>
-			<th style="min-width:200px;width:300px;">{{Suffixe}}</th>
-		</tr>
-	</thead>
-	<tbody>
+<form>
+	<table id="table_virtualenv">
+		<thead>
+			<tr>
+				<th style="min-width:200px;width:300px;">{{PluginId}}</th>
+				<th style="min-width:200px;width:300px;">{{Version python}}</th>
+				<th style="min-width:200px;width:300px;">{{Suffixe}}</th>
+				<th style="min-width:200px;width:200px;">{{Sélection}}</th>
+			</tr>
+		</thead>
+		<tbody>
 
 <?php
 
@@ -61,13 +67,58 @@ if (!$plugin->isActive()) {
 			echo '  <td>';
 			echo $suffix;
 			echo '  </td>';
+			echo '  <td>';
+			echo '		<input type="checkbox" id="' . $virtualenv['fullname'] . '" name="virtualenv">';
+			echo '  </td>';
 			echo '</tr>';
 		}
 
 ?>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>
+					<p>&nbsp;</p>
+					<a class="btn btn-danger" id="bt_RemoveVirtualenv"><i class="fas fa-trash"></i> {{Supprimer la sélection}}</a>
+				</td>
+		</tbody>
+	</table>
+</form>
 
-	</tbody>
-</table>
+<script>
+	const checkboxes = document.querySelectorAll('input[type="checkbox"][name="virtualenv"]');
+	const bt_RemoveVirtualenv = document.getElementById('bt_RemoveVirtualenv');
+
+	bt_RemoveVirtualenv.addEventListener('click', (event) => {
+		if (!bt_RemoveVirtualenv.disabled) {
+			event.preventDefault();
+			bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer la sélection ?}}', function(result) {
+				checkboxes.forEach(checkbox => {
+					if (!result)
+						return;
+					if (checkbox.checked) {
+						console.log(checkbox.id);
+						$.ajax({
+							type: "POST",
+							url: "plugins/pyenv/core/ajax/pyenv.ajax.php",
+							data: {
+								action: "deleteVirtualenv",
+								virtualenv: checkbox.id
+							},
+							dataType: 'json',
+							error: function (request, status, error) {
+								handleAjaxError(request, status, error);
+							}
+						});
+					}
+				});
+				window.location.reload();
+			});
+		};
+	});
+
+</script>
 
 <?php
 
