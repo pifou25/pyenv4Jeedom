@@ -146,7 +146,7 @@ if ($eqPyenv->getConfiguration(pyenv::LOCK, 'false') !== 'false') {
 // ...
 // ...
 
-$script = realpath(__DIR__ . '/../../ressources/mymodbusd/mymodbusd.py');
+$script = realpath(__DIR__ . '/../../resources/mymodbusd/mymodbusd.py');
 $args = '--socketport ' . $socketPort . ' --loglevel ' . $daemonLoglevel . ' --apikey ' . $daemonApikey . ' --callback ' . $daemonCallback . ' --json ' . $jsonEqConfig;
 
 log::add('mymodbus', 'info', 'Lancement du démon mymodbus : ' . $script);
@@ -341,7 +341,7 @@ Ne retourne rien en mode démon.
 $args = '-a -b "valeur"';
 $virtualenvs = pyenv::getVirtualenvNames('mymodbus', '3.11.4', 'pymodbus3.2.2');
 try {
-  pyenv::runPyenv(realpath(__DIR__ . '/../../ressources/super_script.py'), $args, $virtualenvs[0]['fullname']);
+  pyenv::runPyenv(realpath(__DIR__ . '/../../resources/super_script.py'), $args, $virtualenvs[0]['fullname']);
 } catch (Exception $e) {
   
 }
@@ -372,7 +372,7 @@ Retourne le contenu d'un script shell (sans la ligne shebang) pour exécuter la 
 $args = '-a -b "valeur"';
 $virtualenvs = pyenv::getVirtualenvNames('mymodbus', '3.11.4', 'pymodbus3.2.2');
 try {
-  $script = pyenv::sourceScript(realpath(__DIR__ . '/../../ressources/super_script.py'), $args, $virtualenvs[0]['fullname']);
+  $script = pyenv::sourceScript(realpath(__DIR__ . '/../../resources/super_script.py'), $args, $virtualenvs[0]['fullname']);
 } catch (Exception $e) {
   
 }

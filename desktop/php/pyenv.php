@@ -22,7 +22,7 @@ if (!$plugin->isActive()) {
 	pyenv::init();
 	
 	$pyenv_version = pyenv::runPyenv('pyenv', '--version');
-	echo '<p>' . sprintf(__("Version de pyenv : %s", __FILE__), $pyenv_version[0]) . '</p>';
+	echo '<p><b>' . sprintf(__("Version de pyenv : %s", __FILE__), $pyenv_version[0]) . '</b></p>';
 
 
 	$eqLogic = pyenv::byLogicalId($pluginId, $pluginId);

@@ -10,9 +10,19 @@ else
   exit
 fi
 TMP_FILE=/tmp/post-install_pyenv_bashrc
-SHELL_INIT="$(realpath ressources)/shell_init"
-PYENV_UPDATE="$(realpath ressources)/pyenv_update"
-export PYENV_ROOT="$(realpath ressources)/pyenv"
+SHELL_INIT="$(realpath resources)/shell_init"
+PYENV_UPDATE="$(realpath resources)/pyenv_update"
+export PYENV_ROOT="$(realpath resources)/pyenv"
+
+# Suppression du répertoire 'ressources' (2 S)
+if [ -d ressources ]; then
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "ATTENTION : la structure de pyenv4Jeedom était erronée et nécessite une réorganisation."
+  echo "   Les démons s'appuyant sur pyenv4Jeedom vont être impactés et doivent être redémarrés."
+  echo "   Les versions de python et les virtualenv devront être réinstallés."
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  rm -rf ressources
+fi
 
 touch "$PROGRESS_FILE"
 echo 5 > "$PROGRESS_FILE"

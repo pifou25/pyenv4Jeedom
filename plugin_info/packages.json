@@ -20,6 +20,6 @@
   "plugin": {
   },
   "post-install": {
-    "script" : "plugins/pyenv/ressources/post-install.sh"
+    "script" : "plugins/pyenv/resources/post-install.sh"
   }
 }

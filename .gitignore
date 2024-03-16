@@ -3,5 +3,5 @@ Thumbs.db
 *.php~
 docs/Gemfile.lock
 docs/.sass-cache/
-ressources/pyenv
-ressources/shell_init
+resources/pyenv
+resources/shell_init

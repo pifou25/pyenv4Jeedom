@@ -33,7 +33,7 @@ class pyenv extends eqLogic {
   public static $_encryptConfigKey = array('param1', 'param2');
   */
 
-  // Les noms de fichier sont définis relativement au répertoire 'ressources'
+  // Les noms de fichier sont définis relativement au répertoire 'resources'
   const SHELL_INIT = '/shell_init';
   const SCRIPT_TMP = '/script.tmp';
   const PYTHON_BUILD = '/pyenv/plugins/python-build/bin/python-build';
@@ -90,7 +90,7 @@ class pyenv extends eqLogic {
       return;
     
     self::updatePyenv();
-    $python_build = self::runPyenv(realpath(__DIR__ . '/../../ressources') . self::PYTHON_BUILD, '--definitions');
+    $python_build = self::runPyenv(realpath(__DIR__ . '/../../resources') . self::PYTHON_BUILD, '--definitions');
     if (!in_array($_version, $python_build))
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("La version python '%s' n'est pas disponible à l'installation", __FILE__), $_version));
 
@@ -143,7 +143,7 @@ class pyenv extends eqLogic {
     } elseif (is_string($_requirements) && $_requirements !== '') {
       $requirements_content = $_requirements;
     }
-    $requirements_txt = realpath(__DIR__ . '/../../ressources') . self::REQUIREMENTS;
+    $requirements_txt = realpath(__DIR__ . '/../../resources') . self::REQUIREMENTS;
     if (file_put_contents($requirements_txt, $requirements_content) === false)
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("Impossible de créer le fichier '%s'", __FILE__), $requirements_txt));
     
@@ -225,7 +225,7 @@ class pyenv extends eqLogic {
    */
   public static function sourceScript($_command, $_args='', $_virtualenv=null, $_daemon=false) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . sprintf(" * command = '%s', args = '%s', virtualenv = '%s', daemon = '%s'", $_command, $_args, var_export($_virtualenv, true), var_export($_daemon, true)));
-    $ret = file(realpath(__DIR__ . '/../../ressources') . self::SHELL_INIT);
+    $ret = file(realpath(__DIR__ . '/../../resources') . self::SHELL_INIT);
     if (is_file($_command)) {
       $dirname = dirname($_command);
       $ret[] = sprintf('cd "%s"', $dirname);
@@ -292,13 +292,13 @@ class pyenv extends eqLogic {
   }
 
   /*
-   * Permet d'inclure le répertoire ressources/pyenv au backup
+   * Permet d'inclure le répertoire resources/pyenv au backup
    */
   public static function backupExclude() {
     if (config::byKey('includeInBackup', __CLASS__, '0', true) === '1')
       return;
     return [
-      'ressources/pyenv'
+      'resources/pyenv'
     ];
   }
 

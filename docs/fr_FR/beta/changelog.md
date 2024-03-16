@@ -7,6 +7,13 @@
 ## TODO
 - Corriger le script **post-install.sh** pour que la mise à jour se fasse correctement
 
+## 16/03/2024 V0.6 beta
+- Utilisation du répertoire 'resources' au lieu de 'ressources'. Les versions de python et les virtualenv doivent être
+réinstallés :
+  - Avant la mise à jour, il faut arrêter les démons des plugins qui utilisent pyenv4Jeedom
+  - Il faut réinstaller les dépendances si ce n'est pas fait automatiquement
+- Documentation à jour
+
 ## 10/03/2024 V0.5 beta
 - Ajout des infos de santé
 
