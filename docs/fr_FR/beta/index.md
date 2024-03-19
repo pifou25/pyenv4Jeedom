@@ -5,8 +5,22 @@
 > au début du changelog et ne sont donc pas évoquées ici.
 
 Le plugin pyenv4Jeedom (pyenv) permet d'externaliser les fonctions de pyenv. Ce plugin est une dépendance pour un autre
-plugin que vous avez installé. Si vous ne développez pas un plugin nécessitant pyenv, cette documentation ne vous sera
-d'aucune utilité.
+plugin que vous avez installé. Si vous ne développez pas un plugin nécessitant pyenv, seul le premier chapitre vous
+sera utile, le reste de cette documentation ne vous sera d'aucune utilité.
+
+# Page d'état de pyenv4Jeedom
+
+Il n'y a pas d'équipement et de commande à gérer, la page du plugin permet de lister les virtualenv installés par les
+plugins qui en ont besoin. Il est possible de les supprimer en cas de problème, cette action reste cependant à réserver
+dans des cas bien particilers.
+
+Il se peut qu'un message indique qu'une commande bloquante est en cours d'exécution. Ce n'est pas un message d'erreur
+mais un message normal qui vous informe qu'une commande gourmande en ressource est en cours d'exécution. Cela peut être
+l'installation et donc la compilation d'une nouvelle version de python nécessaire pour un plugin ou l'installation d'un
+virtualenv. Une commande bloquante empêche l'exécution d'une autre commande bloquante. Il n'est possible d'exécuter
+qu'une seule commande bloquante à la fois.
+
+La page santé du plugin reprend plus ou moins les mêmes informations.
 
 # Configuration
 
