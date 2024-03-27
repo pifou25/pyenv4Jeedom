@@ -94,8 +94,9 @@ class pyenv extends eqLogic {
     if (!in_array($_version, $python_build))
       throw new Exception(__CLASS__ . '::' . __FUNCTION__ . '&nbsp;:<br>' . sprintf(__("La version python '%s' n'est pas disponible à l'installation", __FILE__), $_version));
 
-    $arg = sprintf('install %s', $_version);
+    $arg = sprintf('install -s %s', $_version);
     self::runPyenv('pyenv', $arg, null, false, true);
+    self::runPyenv('pyenv', 'rehash', null, false, true);
     log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Python version '%s' installée", __FILE__), $_version));
   }
 
@@ -105,9 +106,9 @@ class pyenv extends eqLogic {
   static function uninstallPython($_version) {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__ . ' * version = ' . $_version);
     $arg = sprintf('uninstall -f %s', $_version);
-    log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Python version '%s' désinstallée", __FILE__), $_version));
     if (self::pythonIsInstalled($_version))
       self::runPyenv('pyenv', $arg, null, false, true);
+    log::add(__CLASS__, 'info', __CLASS__ . '::' . __FUNCTION__ . ': ' . sprintf(__("Python version '%s' désinstallée", __FILE__), $_version));
   }
   
   /*
@@ -307,6 +308,7 @@ class pyenv extends eqLogic {
    */
   public static function health() {
     log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
+    self::init();
     $ret = array();
     $lock = array();
     $eqLogic = self::byLogicalId(__CLASS__, __CLASS__);

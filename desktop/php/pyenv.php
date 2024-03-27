@@ -21,9 +21,8 @@ if (!$plugin->isActive()) {
 	
 	pyenv::init();
 	
-	$pyenv_version = pyenv::runPyenv('pyenv', '--version');
+	$pyenv_version = pyenv::runPyenv('pyenv', "--version | awk '{ print $2 }'");
 	echo '<p><b>' . sprintf(__("Version de pyenv : %s", __FILE__), $pyenv_version[0]) . '</b></p>';
-
 
 	$eqLogic = pyenv::byLogicalId($pluginId, $pluginId);
 	if ($eqLogic->getConfiguration(pyenv::LOCK, 'false') !== 'false')

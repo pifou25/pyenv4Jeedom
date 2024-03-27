@@ -7,6 +7,10 @@
 ## TODO
 - Corriger le script **post-install.sh** pour que la mise à jour se fasse correctement
 
+## 27/03/2024 V0.7 beta
+- Correction d'une erreur possible dans la page santé
+- Améliorations mineures
+
 ## 16/03/2024 V0.6 beta
 - Utilisation du répertoire 'resources' au lieu de 'ressources'. Les versions de python et les virtualenv doivent être
 réinstallés :
