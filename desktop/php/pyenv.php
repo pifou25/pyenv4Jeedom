@@ -2,6 +2,39 @@
 if (!isConnect('admin')) {
 	throw new Exception('{{401 - Accès non autorisé}}');
 }
+
+function format_intervalle(DateInterval $intervalle) {
+	$mois = $intervalle->m;
+	$jours = $intervalle->days;
+	$heures = $intervalle->h;
+	$minutes = $intervalle->i;
+	$secondes = $intervalle->s;
+
+	$texte = "";
+
+	if ($mois > 0) {
+		$texte .= $mois . " mois";
+	}
+
+	if ($jours > 0) {
+		$texte .= (strlen($texte) > 0 ? ", " : "") . $jours . " jour" . ($jours > 1 ? "s" : "");
+	}
+
+	if ($heures > 0) {
+		$texte .= (strlen($texte) > 0 ? ", " : "") . $heures . " heure" . ($heures > 1 ? "s" : "");
+	}
+
+	if ($minutes > 0) {
+		$texte .= (strlen($texte) > 0 ? ", " : "") . $minutes . " minute" . ($minutes > 1 ? "s" : "");
+	}
+
+	if ($secondes > 0) {
+		$texte .= (strlen($texte) > 0 ? ", " : "") . $secondes . " seconde" . ($secondes > 1 ? "s" : "");
+	}
+
+	return $texte;
+}
+
 // Déclaration des variables obligatoires
 $pluginId = 'pyenv';
 $plugin = plugin::byId($pluginId);
@@ -25,8 +58,25 @@ if (!$plugin->isActive()) {
 	echo '<p><b>' . sprintf(__("Version de pyenv : %s", __FILE__), $pyenv_version[0]) . '</b></p>';
 
 	$eqLogic = pyenv::byLogicalId($pluginId, $pluginId);
-	if ($eqLogic->getConfiguration(pyenv::LOCK, 'false') !== 'false')
-		echo '<p>' . sprintf(__("Une commande bloquante est en cours d'exécution : '%s'", __FILE__), $eqLogic->getConfiguration(pyenv::LOCKING_CMD, '')) . '</p>';
+	if ($eqLogic->getConfiguration(pyenv::LOCK, 'false') !== 'false') {
+		echo '<p>' . sprintf(__("Une commande bloquante est en cours d'exécution : '%s'", __FILE__), $eqLogic->getConfiguration(pyenv::LOCKING_CMD, '')) . '<br>';
+		$timestamp = intval($eqLogic->getConfiguration(pyenv::TIMESTAMP, time()));
+		$dt = new DateTime();
+		$dt->setTimestamp($timestamp);
+		$now = new DateTime();
+		$dd = date_diff($now, $dt);
+		echo sprintf(__("Cette commande est lancée depuis %s", __FILE__), format_intervalle($dd)) . '<br>';
+
+		$total_minutes = $dd->m * 30 * 24 * 60 + $dd->days * 24 * 60 + $dd->h * 60 + $dd->i;
+		$output = array();
+		$retval = null;
+		$ret_exec = exec(sprintf("ps ax | grep '%s' | grep -v grep", $eqLogic->getConfiguration(pyenv::LOCKING_CMD, '')), $output, $retval);
+		if ($total_minutes >= 5 && count($output) == 0) {
+			echo "<br>{{Il semble que cette commande n'est plus en cours d'exécution, il est possible de réinitialiser le verrou pour les commandes bloquante.}}&nbsp;";
+			echo '<a class="btn btn-danger" id="bt_ReinitPyenv"><i class="fas fa-trash"></i> {{Réinitialiser pyenv4Jeedom}}</a><br>';
+		}
+		echo '</p>';
+	}
 	
 	$virtualenvNames = pyenv::getVirtualenvNames();
 	if (count($virtualenvNames) === 0) {
@@ -96,7 +146,7 @@ if (!$plugin->isActive()) {
 					if (!result)
 						return;
 					if (checkbox.checked) {
-						console.log(checkbox.id);
+						//console.log(checkbox.id);
 						$.ajax({
 							type: "POST",
 							url: "plugins/pyenv/core/ajax/pyenv.ajax.php",
@@ -107,11 +157,13 @@ if (!$plugin->isActive()) {
 							dataType: 'json',
 							error: function (request, status, error) {
 								handleAjaxError(request, status, error);
+							},
+    					success: function (data) {
+								window.location.reload();
 							}
 						});
 					}
 				});
-				window.location.reload();
 			});
 		};
 	});
@@ -120,7 +172,44 @@ if (!$plugin->isActive()) {
 
 <?php
 
-	}	
+	}
+
+?>
+
+<script>
+	const bt_ReinitPyenv = document.getElementById('bt_ReinitPyenv');
+
+	if (!is_null(bt_ReinitPyenv)) {
+		bt_ReinitPyenv.addEventListener('click', (event) => {
+			if (!bt_ReinitPyenv.disabled) {
+				event.preventDefault();
+				bootbox.confirm('{{Êtes-vous sûr de vouloir réinitialiser le verrou ?}}', function(result) {
+					if (!result)
+						return;
+
+					$.ajax({
+						type: "POST",
+						url: "plugins/pyenv/core/ajax/pyenv.ajax.php",
+						data: {
+							action: "ReinitPyenv"
+						},
+						dataType: 'json',
+						error: function (request, status, error) {
+							handleAjaxError(request, status, error);
+						},
+						success: function (data) {
+							window.location.reload();
+						}
+					});
+				});
+			};
+		});
+	}
+
+</script>
+
+<?php
+
 }
 
 // Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->

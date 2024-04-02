@@ -18,7 +18,9 @@ Il se peut qu'un message indique qu'une commande bloquante est en cours d'exécu
 mais un message normal qui vous informe qu'une commande gourmande en ressource est en cours d'exécution. Cela peut être
 l'installation et donc la compilation d'une nouvelle version de python nécessaire pour un plugin ou l'installation d'un
 virtualenv. Une commande bloquante empêche l'exécution d'une autre commande bloquante. Il n'est possible d'exécuter
-qu'une seule commande bloquante à la fois.
+qu'une seule commande bloquante à la fois.  
+Si cette commande est lancée depuis au moins 5 minutes, que le verrou est toujours en place et que la commande n'est
+pas exécutée, il est possible de réinitialiser le verrou manuellement afin de débloquer la situation.
 
 La page santé du plugin reprend plus ou moins les mêmes informations.
 

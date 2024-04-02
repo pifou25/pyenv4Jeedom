@@ -43,6 +43,7 @@ class pyenv extends eqLogic {
 
   const LOCK = 'lock';
   const LOCKING_CMD = 'locking_cmd';
+  const TIMESTAMP = 'timestamp';
 
   /*     * ***********************Methode static*************************** */
 
@@ -67,6 +68,7 @@ class pyenv extends eqLogic {
       $eqLogic->setEqType_name(__CLASS__);
       $eqLogic->setConfiguration(self::LOCK, 'false');
       $eqLogic->setConfiguration(self::LOCKING_CMD, '');
+      $eqLogic->setConfiguration(self::TIMESTAMP, time());
       $eqLogic->setIsEnable(0);
       $eqLogic->setIsVisible(0);
       $eqLogic->save();
@@ -185,6 +187,20 @@ class pyenv extends eqLogic {
   }
 
   /*
+   * Réinitialise le verrou d'exécution de commande bloquante
+   */
+  public static function reinit() {
+    log::add(__CLASS__, 'debug', __CLASS__ . '::' . __FUNCTION__);
+    $eqLogic = pyenv::byLogicalId(__CLASS__, __CLASS__);
+    if (is_object($eqLogic)) {
+      $eqLogic->setConfiguration(self::LOCK, 'false');
+      $eqLogic->setConfiguration(self::LOCKING_CMD, '');
+      $eqLogic->setConfiguration(self::TIMESTAMP, time());
+      $eqLogic->save();
+    }
+  }
+
+  /*
    * Exécute une commande pyenv
    */
   public static function runPyenv($_command, $_args='', $_virtualenv=null, $_daemon=false, $_lock=false) {
@@ -201,6 +217,7 @@ class pyenv extends eqLogic {
     if ($_lock !== false) {
       $eqLogic->setConfiguration(self::LOCK, 'true');
       $eqLogic->setConfiguration(self::LOCKING_CMD, sprintf('%s %s', $_command, $_args));
+      $eqLogic->setConfiguration(self::TIMESTAMP, time());
       $eqLogic->save();
     }
 
@@ -211,6 +228,7 @@ class pyenv extends eqLogic {
     if ($_lock !== false && $eqLogic->getConfiguration(self::LOCK, 'true') !== 'false') {
       $eqLogic->setConfiguration(self::LOCK, 'false');
       $eqLogic->setConfiguration(self::LOCKING_CMD, '');
+      // Le timestamp n'est volontairement pas mis à jour pour garder le timestamp de la dernière commande bloquante
       $eqLogic->save();
     }
 
@@ -313,7 +331,7 @@ class pyenv extends eqLogic {
     $lock = array();
     $eqLogic = self::byLogicalId(__CLASS__, __CLASS__);
     $lock['test'] = __("Commande bloquante en cours", __FILE__);
-    $lock['result'] = $eqLogic->getConfiguration(self::LOCKING_CMD, 'Aucune');
+    $lock['result'] = $eqLogic->getConfiguration(self::LOCKING_CMD, __("Aucune", __FILE__));
     $lock['state'] = ($eqLogic->getConfiguration(self::LOCK, 'false') !== 'false') ? 'nok' : 'ok';
     $ret[] = $lock;
 

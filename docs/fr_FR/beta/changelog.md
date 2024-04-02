@@ -5,7 +5,13 @@
 > que seule la documantation a été mise à jour.
 
 ## TODO
-- Corriger le script **post-install.sh** pour que la mise à jour se fasse correctement
+- Modifier le répertoire d'installation de pyenv vers /opt/pyenv
+- Mettre la documentation à jour
+
+## 03/04/2024 V0.8 beta
+- Ajout d'une information sur la page du plugin concernant le temps depuis lequel une commande bloquante est en cours
+- Possibilité de réinitialiser le verrou pour les commandes bloquantes après 5 minutes si la commande en question n'est
+pas exécutée
 
 ## 27/03/2024 V0.7 beta
 - Correction d'une erreur possible dans la page santé
